@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的世界全版本指令辅助 | 轮回道尘</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --mc-green: #5D8C3A;
+            --mc-dark-green: #3D6E2E;
+            --mc-light-green: #7EB356;
+            --mc-orange: #d97706;
+            --mc-red: #dc2626;
+            --mc-blue: #2563eb;
+            --mc-cyan: #06b6d4;
+            --mc-gold: #fbbf24;
+            --mc-purple: #9333ea;
+            --sidebar-width: 280px;
+            --bg-dark: #0a0f1c;
+            --glass-bg: rgba(20, 25, 40, 0.95);
+            --hover-bg: rgba(93, 140, 58, 0.15);
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Noto Sans SC', sans-serif; 
+            background: var(--bg-dark); 
+            color: #e2e8f0; 
+            margin: 0; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .pixel-font { font-family: 'VT323', monospace; }
+        .mono-font { font-family: 'JetBrains Mono', monospace; }
+        
+        /* 星空背景 */
+        .stars-bg { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: -2;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+        
+        .particles { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: -1; 
+            overflow: hidden; 
+            pointer-events: none; 
+        }
+        
+        .particle { 
+            position: absolute; 
+            width: 2px; 
+            height: 2px; 
+            background: var(--mc-green); 
+            border-radius: 50%; 
+            opacity: 0.6; 
+            animation: float-up linear infinite; 
+            box-shadow: 0 0 10px var(--mc-green);
+        }
+        
+        @keyframes float-up { 
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 
+            10% { opacity: 0.8; } 
+            90% { opacity: 0.8; } 
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; } 
+        }
+        
+        /* 侧边栏 - 优化版 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Logo区域优化 */
+        .logo-area {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        
+        .logo-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+                        linear-gradient(135deg, var(--mc-green), var(--mc-gold)) border-box;
+            box-shadow: 0 0 15px rgba(93,140,58,0.3);
+            animation: logo-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes logo-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(93,140,58,0.3); }
+            50% { box-shadow: 0 0 25px rgba(93,140,58,0.5); }
+        }
+        
+        .logo-text h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--mc-light-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .logo-text span {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        /* 导航菜单层级结构 */
+        .nav-container {
+            flex: 1;
+            padding: 16px 12px;
+        }
+        
+        .nav-section {
+            margin-bottom: 8px;
+        }
+        
+        /* 一级菜单样式 */
+        .nav-parent {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .nav-parent:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        
+        .nav-parent.active {
+            background: var(--hover-bg);
+            color: var(--mc-light-green);
+        }
+        
+        .nav-parent-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .expand-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        .nav-parent.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* 二级菜单容器 */
+        .nav-children {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 12px;
+        }
+        
+        .nav-parent.expanded + .nav-children {
+            max-height: 500px;
+        }
+        
+        /* 二级菜单项 */
+        .nav-child {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px 10px 44px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .nav-child::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        
+        .nav-child:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        
+        .nav-child.active {
+            background: rgba(93,140,58,0.2);
+            color: var(--mc-light-green);
+        }
+        
+        .nav-child.active::before {
+            background: var(--mc-light-green);
+            opacity: 1;
+        }
+        
+        .nav-badge {
+            background: rgba(93,140,58,0.2);
+            color: var(--mc-light-green);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* 分隔标题 */
+        .nav-divider {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            padding: 16px 16px 8px;
+            font-weight: 600;
+        }
+        
+        /* 底部统计 */
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            color: var(--mc-light-green);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 32px;
+            transition: margin-left 0.3s;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--mc-light-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* 上传区域 */
+        .upload-card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.6), rgba(15,23,42,0.6));
+            border: 2px dashed rgba(93,140,58,0.3);
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 32px;
+        }
+        
+        .upload-card:hover {
+            border-color: var(--mc-green);
+            background: rgba(93,140,58,0.05);
+            transform: translateY(-2px);
+        }
+        
+        /* 搜索框 */
+        .search-box {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(30,41,59,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--mc-green);
+            box-shadow: 0 0 0 3px rgba(93,140,58,0.1);
+        }
+        
+        /* 筛选标签 */
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .chip {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #cbd5e1;
+        }
+        
+        .chip:hover {
+            background: rgba(93,140,58,0.1);
+            border-color: rgba(93,140,58,0.3);
+        }
+        
+        .chip.active {
+            background: linear-gradient(135deg, var(--mc-green), var(--mc-dark-green));
+            border-color: transparent;
+            color: #fff;
+        }
+        
+        /* 内容卡片网格 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--mc-green), var(--mc-gold));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(93,140,58,0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-cmd { border-top: 3px solid var(--mc-green); }
+        .card-block { border-top: 3px solid var(--mc-orange); }
+        .card-redstone { border-top: 3px solid var(--mc-red); }
+        .card-item { border-top: 3px solid var(--mc-blue); }
+        .card-adv { border-top: 3px solid var(--mc-cyan); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .card-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.6rem;
+            color: #fff;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .card-version {
+            font-size: 0.75rem;
+            color: #64748b;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .card-desc {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 4px 10px;
+            background: rgba(93,140,58,0.2);
+            color: var(--mc-light-green);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .tag-red { background: rgba(220,38,38,0.2); color: #fca5a5; }
+        .tag-blue { background: rgba(37,99,235,0.2); color: #60a5fa; }
+        .tag-cyan { background: rgba(6,182,212,0.2); color: #22d3ee; }
+        .tag-orange { background: rgba(217,119,6,0.2); color: #fbbf24; }
+        .tag-purple { background: rgba(147,51,234,0.2); color: #c084fc; }
+        
+        /* ID块 */
+        .id-block {
+            background: rgba(0,0,0,0.4);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--mc-gold);
+            border: 1px solid rgba(251,191,36,0.3);
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            word-break: break-all;
+        }
+        
+        .id-block:hover {
+            border-color: var(--mc-gold);
+            background: rgba(251,191,36,0.1);
+        }
+        
+        /* 版本范围标签 */
+        .version-range {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+        
+        .version-range i {
+            color: var(--mc-green);
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+            color: #64748b;
+            background: rgba(30,41,59,0.3);
+            border-radius: 16px;
+            border: 2px dashed rgba(255,255,255,0.1);
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30,41,59,0.98), rgba(15,23,42,0.98));
+            border: 1px solid rgba(93,140,58,0.3);
+            border-radius: 24px;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 32px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(220,38,38,0.2);
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, var(--mc-green), var(--mc-dark-green));
+            color: #fff;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 500;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* 移动端菜单按钮 */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 99;
+            width: 44px;
+            height: 44px;
+            background: var(--glass-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 遮罩 */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 90;
+            backdrop-filter: blur(4px);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 80px 20px 20px;
+            }
+            
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .overlay.show {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--mc-green);
+            border-radius: 3px;
+        }
+        
+        /* 分类标签特殊样式 */
+        .category-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+        
+        .cat-main { background: rgba(234,179,8,0.2); color: #facc15; }
+        .cat-nether { background: rgba(220,38,38,0.2); color: #f87171; }
+        .cat-end { background: rgba(147,51,234,0.2); color: #c084fc; }
+        .cat-adventure { background: rgba(6,182,212,0.2); color: #22d3ee; }
+        .cat-husbandry { background: rgba(34,197,94,0.2); color: #4ade80; }
+    </style>
+</head>
+<body>
+    <div class="stars-bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo区域 -->
+        <div class="logo-area">
+            <img src="image.png" alt="Logo" class="logo-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%235D8C3A%22 width=%22100%22 height=%22100%22 rx=%2210%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2250%22 text-anchor=%22middle%22 fill=%22white%22%3EMC%3C/text%3E%3C/svg%3E'">
+            <div class="logo-text">
+                <h1>MC指令辅助</h1>
+                <span>v 1.15.0 Pro</span></p>
+                <span>轮回道尘精心制作|多版本辅助</span></p>
+                <span>https://qm.qq.com/q/EhczsbIroQ</span>
+            </div>
+        </div>
+        
+        <!-- 导航菜单 -->
+        <nav class="nav-container">
+            <!-- 数据分类组 -->
+            <div class="nav-divider">数据分类</div>
+            
+            <!-- 主页（可展开一级菜单） -->
+            <div class="nav-section">
+                <div class="nav-parent expanded" onclick="toggleMenu(this)" data-menu="home">
+                    <div class="nav-parent-left">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span>主页</span>
+                    </div>
+                    <i class="fas fa-chevron-down expand-icon"></i>
+                </div>
+                
+                <!-- 二级菜单 -->
+                <div class="nav-children" style="max-height: 500px;">
+                    <div class="nav-child active" onclick="switchTab('commands', this)">
+                        <span>指令大全</span>
+                        <span class="nav-badge" id="badge-cmd">0</span>
+                    </div>
+                    <div class="nav-child" onclick="switchTab('blocks', this)">
+                        <span>命令方块</span>
+                        <span class="nav-badge" id="badge-block">0</span>
+                    </div>
+                    <div class="nav-child" onclick="switchTab('redstone', this)">
+                        <span>红石元件</span>
+                        <span class="nav-badge" id="badge-redstone">0</span>
+                    </div>
+                    <div class="nav-child" onclick="switchTab('items', this)">
+                        <span>物品ID</span>
+                        <span class="nav-badge" id="badge-item">0</span>
+                    </div>
+                    <div class="nav-child" onclick="switchTab('advancements', this)">
+                        <span>准则ID</span>
+                        <span class="nav-badge" id="badge-adv">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 操作组 -->
+            <div class="nav-divider">操作</div>
+            
+            <div class="nav-parent" onclick="selectFiles()">
+                <div class="nav-parent-left">
+                    <span class="nav-icon"><i class="fas fa-upload"></i></span>
+                    <span>导入数据</span>
+                </div>
+            </div>
+            
+            <div class="nav-parent" onclick="clearAllData()">
+                <div class="nav-parent-left">
+                    <span class="nav-icon"><i class="fas fa-trash-alt"></i></span>
+                    <span>清空数据</span>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- 底部统计 -->
+        <div class="sidebar-footer">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">总数据</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-cmd">0</div>
+                    <div class="stat-label">指令</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- 主内容 -->
+    <main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title" id="page-title">指令大全</h2>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="selectFiles()" style="padding: 10px 20px; background: rgba(93,140,58,0.2); border: 1px solid rgba(93,140,58,0.4); color: var(--mc-light-green); border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.2s;">
+                    <i class="fas fa-folder-open mr-2"></i>导入
+                </button>
+                <button onclick="clearAllData()" style="padding: 10px 20px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.2s;">
+                    <i class="fas fa-eraser mr-2"></i>清空
+                </button>
+            </div>
+        </div>
+        
+        <!-- 上传区 -->
+        <div class="upload-card" id="dropZone" onclick="selectFiles()">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📦</div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 8px; font-weight: 600;">拖拽文件或ZIP到此处</h3>
+            <p style="color: #64748b; font-size: 0.9rem;">支持 .txt 或包含多个txt的 .zip 文件</p>
+            <input type="file" id="fileInput" multiple accept=".txt,.zip" style="display: none;">
+        </div>
+        
+        <!-- 搜索 -->
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索..." oninput="handleSearch()">
+        </div>
+        
+        <!-- 筛选器 -->
+        <div class="filter-chips" id="filters">
+            <div class="chip active" onclick="setFilter('all')">全部</div>
+        </div>
+        
+        <!-- 内容 -->
+        <div id="mainContent" class="content-grid">
+            <div class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;">📭</div>
+                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; color: #94a3b8;">暂无数据</div>
+                <div style="font-size: 0.9rem; color: #64748b;">请上传文件开始使用</div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 模态框 -->
+    <div class="modal" id="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // 数据存储 - 使用localStorage持久化
+    const STORAGE_KEY = 'mc_command_helper_data';
+    
+    const data = {
+        commands: new Map(),
+        blocks: [],
+        redstone: [],
+        items: [],
+        advancements: []
+    };
+    
+    let currentTab = 'commands';
+    let currentFilter = 'all';
+    let processedFiles = new Set();
+    
+    const tabNames = {
+        commands: '指令大全',
+        blocks: '命令方块',
+        redstone: '红石元件',
+        items: '物品ID',
+        advancements: '准则ID'
+    };
+    
+    // 版本映射表
+    const versionMap = {
+        'java': 'Java版',
+        'bedrock': '基岩版',
+        'education': '教育版',
+        'edu': '教育版',
+        'netease': '网易版'
+    };
+    
+    // 分类映射（用于准则ID）
+    const categoryMap = {
+        '主线故事': '主线故事',
+        '下界': '下界',
+        '下界准则': '下界',
+        '末地': '末地',
+        '末地准则': '末地',
+        '冒险': '冒险',
+        '冒险准则': '冒险',
+        '农牧业': '农牧业',
+        '农牧业准则': '农牧业'
+    };
+    
+    // 初始化
+    window.onload = function() {
+        initParticles();
+        loadFromStorage();
+    };
+    
+    // 从localStorage加载数据
+    function loadFromStorage() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.commands) {
+                    parsed.commands.forEach(([key, value]) => {
+                        data.commands.set(key, value);
+                    });
+                }
+                if (parsed.blocks) data.blocks = parsed.blocks;
+                if (parsed.redstone) data.redstone = parsed.redstone;
+                if (parsed.items) data.items = parsed.items;
+                if (parsed.advancements) data.advancements = parsed.advancements;
+                if (parsed.processedFiles) processedFiles = new Set(parsed.processedFiles);
+                
+                updateStats();
+                updateFilters();
+                renderContent();
+                showToast('✓ 已恢复上次的数据');
+            }
+        } catch (e) {
+            console.error('加载数据失败:', e);
+        }
+    }
+    
+    // 保存到localStorage
+    function saveToStorage() {
+        try {
+            const saveData = {
+                commands: Array.from(data.commands.entries()),
+                blocks: data.blocks,
+                redstone: data.redstone,
+                items: data.items,
+                advancements: data.advancements,
+                processedFiles: Array.from(processedFiles)
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+        } catch (e) {
+            console.error('保存数据失败:', e);
+        }
+    }
+    
+    function initParticles() {
+        const container = document.getElementById('particles');
+        for(let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 15 + 's';
+            p.style.animationDuration = (10 + Math.random() * 20) + 's';
+            container.appendChild(p);
+        }
+    }
+    
+    // 侧边栏控制
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('show');
+    }
+    
+    // 菜单展开/折叠
+    function toggleMenu(element) {
+        element.classList.toggle('expanded');
+        const children = element.nextElementSibling;
+        if(element.classList.contains('expanded')) {
+            children.style.maxHeight = '500px';
+        } else {
+            children.style.maxHeight = '0';
+        }
+    }
+    
+    // 切换Tab
+    function switchTab(tab, element) {
+        currentTab = tab;
+        currentFilter = 'all';
+        
+        // 更新二级菜单激活状态
+        document.querySelectorAll('.nav-child').forEach(el => el.classList.remove('active'));
+        if(element) element.classList.add('active');
+        
+        // 更新页面标题
+        document.getElementById('page-title').textContent = tabNames[tab];
+        
+        // 移动端关闭侧边栏
+        if(window.innerWidth <= 1024) {
+            toggleSidebar();
+        }
+        
+        // 重置搜索
+        document.getElementById('searchInput').value = '';
+        
+        // 更新筛选器
+        updateFilters();
+        
+        // 渲染
+        renderContent();
+    }
+    
+    // 文本清理 - 加强版
+    function cleanText(text) {
+        if(!text) return '';
+        return text
+            .replace(/【|】/g, '')
+            .replace(/\[/g, '')
+            .replace(/\]/g, '')
+            .replace(/[（(].*?[)）]/g, '') // 去除括号内容
+            .replace(/^\s*[-–—]\s*/g, '') // 去除开头的横线
+            .trim();
+    }
+    
+    // 提取版本范围
+    function extractVersionRange(text) {
+        if(!text) return null;
+        const patterns = [
+            /(\d+\.\d+(?:\.\d+)?)\s*[-~]\s*(\d+\.\d+(?:\.\d+)?)/,  // 1.12-1.21 或 1.12~1.21
+            /(\d+\.\d+(?:\.\d+)?)\s*\+/,  // 1.12+
+            /(?:Java|BE|Edu|网易版)\s*(\d+\.\d+(?:\.\d+)?)/i  // Java 1.12
+        ];
+        
+        for(let pattern of patterns) {
+            const match = text.match(pattern);
+            if(match) {
+                if(match[2]) {
+                    return { min: match[1], max: match[2] };
+                } else {
+                    return { min: match[1], max: '+' };
+                }
+            }
+        }
+        return null;
+    }
+    
+    // 解析函数
+    function parseItems(text) {
+        const items = [];
+        const entries = text.split(/(?=【)/);
+        for(const entry of entries) {
+            if(!entry.includes('【')) continue;
+            const lines = entry.trim().split('\n');
+            let item = {};
+            for(const line of lines) {
+                if(line.includes('【') && line.includes('】')) item.name = cleanText(line);
+                else if(line.includes('ID')) item.id = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('分类')) item.category = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('简介')) item.desc = cleanText(line.split(/[：:]/)[1] || '');
+            }
+            if(item.name) items.push(item);
+        }
+        return items;
+    }
+    
+    function parseCommands(text, source) {
+        const lines = text.split('\n');
+        let current = null;
+        const versionRange = { min: '', max: '' };
+        
+        for(let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            if(!trimmed || trimmed.startsWith('—')) continue;
+            
+            // 检测指令名（以/开头）
+            if(trimmed.startsWith('/') && !trimmed.includes('：') && !line.includes(':')) {
+                if(current && current.name) {
+                    // 去重检查
+                    const key = `${current.name}_${source}`;
+                    if(!data.commands.has(key)) {
+                        data.commands.set(key, current);
+                    }
+                }
+                current = {
+                    name: cleanText(trimmed.split(/\s+/)[0]),
+                    desc: '',
+                    syntax: cleanText(trimmed),
+                    usage: '',
+                    source: source,
+                    versionRange: { min: '', max: '' },
+                    examples: []
+                };
+            } else if(current) {
+                if(trimmed.startsWith('简介')) current.desc = cleanText(trimmed.substring(3));
+                else if(trimmed.startsWith('语法')) current.syntax = cleanText(trimmed.substring(3));
+                else if(trimmed.startsWith('用途')) current.usage = cleanText(trimmed.substring(3));
+                else if(trimmed.startsWith('适用版本')) {
+                    const verText = trimmed.substring(5);
+                    const range = extractVersionRange(verText);
+                    if(range) current.versionRange = range;
+                }
+                else if(trimmed.startsWith('>')) current.examples.push(cleanText(trimmed.substring(1)));
+            }
+        }
+        if(current && current.name) {
+            const key = `${current.name}_${source}`;
+            if(!data.commands.has(key)) {
+                data.commands.set(key, current);
+            }
+        }
+    }
+    
+    function parseBlocks(text) {
+        const blocks = [];
+        const entries = text.split(/(?=【)/);
+        for(const entry of entries) {
+            if(!entry.includes('【')) continue;
+            const lines = entry.trim().split('\n');
+            let block = { obtains: [], ui: [], tips: [], type: '' };
+            for(const line of lines) {
+                if(line.includes('【') && line.includes('】')) block.name = cleanText(line);
+                else if(line.includes('类型')) block.type = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('功能')) block.desc = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('技巧')) block.tips.push(cleanText(line.split(/[：:]/)[1] || ''));
+            }
+            if(block.name) blocks.push(block);
+        }
+        return blocks;
+    }
+    
+    function parseRedstone(text) {
+        const items = [];
+        const entries = text.split(/(?=【)/);
+        for(const entry of entries) {
+            if(!entry.includes('【')) continue;
+            const lines = entry.trim().split('\n');
+            let item = { features: [], type: '' };
+            for(const line of lines) {
+                if(line.includes('【') && line.includes('】')) item.name = cleanText(line);
+                else if(line.includes('类型')) item.type = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('功能')) item.desc = cleanText(line.split(/[：:]/)[1] || '');
+                else if(line.includes('特性')) item.features.push(cleanText(line.split(/[：:]/)[1] || ''));
+            }
+            if(item.name) items.push(item);
+        }
+        return items;
+    }
+    
+    function parseAdvancements(text) {
+        const advs = [];
+        const lines = text.split('\n');
+        let current = null;
+        
+        for(const line of lines) {
+            const trimmed = line.trim();
+            if(trimmed.startsWith('【') && trimmed.includes('】')) {
+                if(current && current.id) advs.push(current);
+                current = { name: cleanText(trimmed), category: '', id: '', desc: '', condition: '' };
+            } else if(current && trimmed.includes('ID')) {
+                current.id = cleanText(trimmed.split(/[：:]/)[1] || '');
+            } else if(current && trimmed.includes('分类')) {
+                const cat = cleanText(trimmed.split(/[：:]/)[1] || '');
+                current.category = categoryMap[cat] || cat;
+            } else if(current && trimmed.includes('简介')) {
+                current.desc = cleanText(trimmed.split(/[：:]/)[1] || '');
+            } else if(current && trimmed.includes('条件')) {
+                current.condition = cleanText(trimmed.split(/[：:]/)[1] || '');
+            } else if(current && trimmed.includes('版本')) {
+                const verText = trimmed.split(/[：:]/)[1] || '';
+                const range = extractVersionRange(verText);
+                if(range) current.versionRange = range;
+            }
+        }
+        if(current && current.id) advs.push(current);
+        return advs;
+    }
+    
+    // 文件处理
+    document.getElementById('fileInput').addEventListener('change', async function(e) {
+        const files = Array.from(e.target.files);
+        if(files.length === 0) return;
+        
+        let newCount = 0;
+        for(const file of files) {
+            const fid = `${file.name}_${file.size}`;
+            if(processedFiles.has(fid)) continue;
+            processedFiles.add(fid);
+            newCount++;
+            
+            try {
+                if(file.name.endsWith('.zip')) {
+                    const zip = await JSZip.loadAsync(file);
+                    for(const [name, zipFile] of Object.entries(zip.files)) {
+                        if(name.endsWith('.txt')) {
+                            const content = await zipFile.async('text');
+                            processContent(content, name);
+                        }
+                    }
+                } else {
+                    const text = await file.text();
+                    processContent(text, file.name);
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+        
+        if(newCount > 0) {
+            saveToStorage(); // 保存到本地存储
+            showToast(`✓ 成功导入 ${newCount} 个文件`);
+            updateStats();
+            updateFilters();
+            renderContent();
+        }
+        
+        e.target.value = '';
+    });
+    
+    function processContent(text, filename) {
+        const lower = filename.toLowerCase();
+        if(lower.includes('item')) data.items.push(...parseItems(text));
+        else if(lower.includes('redstone')) data.redstone.push(...parseRedstone(text));
+        else if(lower.includes('block')) data.blocks.push(...parseBlocks(text));
+        else if(lower.includes('advancement')) data.advancements.push(...parseAdvancements(text));
+        else {
+            let source = 'unknown';
+            if(lower.includes('java')) source = 'java';
+            else if(lower.includes('bedrock')) source = 'bedrock';
+            else if(lower.includes('edu')) source = 'education';
+            else if(lower.includes('netease')) source = 'netease';
+            parseCommands(text, source);
+        }
+    }
+    
+    function selectFiles() {
+        document.getElementById('fileInput').click();
+    }
+    
+    function clearAllData() {
+        if(!confirm('确定要清空所有数据吗？此操作不可恢复。')) return;
+        
+        data.commands.clear();
+        data.blocks = [];
+        data.redstone = [];
+        data.items = [];
+        data.advancements = [];
+        processedFiles.clear();
+        localStorage.removeItem(STORAGE_KEY);
+        
+        updateStats();
+        updateFilters();
+        renderContent();
+        showToast('✓ 已清空所有数据');
+    }
+    
+    // 渲染
+    function renderContent() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase();
+        const container = document.getElementById('mainContent');
+        let html = '';
+        
+        switch(currentTab) {
+            case 'commands':
+                const cmds = Array.from(data.commands.values()).filter(c => {
+                    if(currentFilter !== 'all' && c.source !== currentFilter) return false;
+                    return !keyword || c.name.includes(keyword) || c.desc.toLowerCase().includes(keyword);
+                });
+                html = cmds.map(c => {
+                    const versionText = c.versionRange.min ? 
+                        `${c.versionRange.min}${c.versionRange.max === '+' ? '+' : '~' + c.versionRange.max}` : '';
+                    return `
+                    <div class="card card-cmd" onclick="showDetail('cmd', '${c.name}', '${c.source}')">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title" style="color: var(--mc-green);">${c.name}</div>
+                                ${versionText ? `<div class="version-range"><i class="fas fa-code-branch"></i> ${versionText}</div>` : ''}
+                            </div>
+                            <span class="tag">${versionMap[c.source] || c.source}</span>
+                        </div>
+                        <div class="card-desc">${c.desc || '暂无简介'}</div>
+                    </div>
+                `}).join('');
+                break;
+                
+            case 'blocks':
+                const blocks = data.blocks.filter(b => {
+                    if(currentFilter !== 'all' && !b.type.includes(currentFilter)) return false;
+                    return !keyword || b.name.toLowerCase().includes(keyword);
+                });
+                html = blocks.map(b => `
+                    <div class="card card-block" onclick="showDetail('block', '${b.name}')">
+                        <div style="margin-bottom: 8px;">
+                            <span class="tag tag-orange">${b.type || '方块'}</span>
+                        </div>
+                        <div class="card-title" style="color: var(--mc-orange);">${b.name}</div>
+                        <div class="card-desc">${b.desc || ''}</div>
+                    </div>
+                `).join('');
+                break;
+                
+            case 'redstone':
+                const reds = data.redstone.filter(r => {
+                    if(currentFilter !== 'all') {
+                        // 支持类型过滤
+                        return r.type && r.type.includes(currentFilter);
+                    }
+                    return !keyword || r.name.toLowerCase().includes(keyword);
+                });
+                html = reds.map(r => `
+                    <div class="card card-redstone" onclick="showDetail('redstone', '${r.name}')">
+                        ${r.type ? `<div style="margin-bottom: 8px;"><span class="tag tag-red">${r.type}</span></div>` : ''}
+                        <div class="card-title" style="color: var(--mc-red);">${r.name}</div>
+                        <div class="card-desc">${r.desc || ''}</div>
+                    </div>
+                `).join('');
+                break;
+                
+            case 'items':
+                const items = data.items.filter(i => {
+                    if(currentFilter !== 'all' && i.category !== currentFilter) return false;
+                    return !keyword || i.name.toLowerCase().includes(keyword) || i.id.toLowerCase().includes(keyword);
+                });
+                html = items.map(i => `
+                    <div class="card card-item">
+                        <div style="margin-bottom: 8px;">
+                            <span class="tag tag-blue">${i.category || '物品'}</span>
+                        </div>
+                        <div class="card-title" style="color: #60a5fa;">${i.name}</div>
+                        <div class="id-block" onclick="event.stopPropagation(); copyText('${i.id}')">${i.id}</div>
+                        <div class="card-desc" style="margin-top: 8px;">${i.desc || ''}</div>
+                    </div>
+                `).join('');
+                break;
+                
+            case 'advancements':
+                const advs = data.advancements.filter(a => {
+                    if(currentFilter !== 'all' && a.category !== currentFilter) return false;
+                    return !keyword || a.id.toLowerCase().includes(keyword) || a.name.toLowerCase().includes(keyword);
+                });
+                html = advs.map(a => {
+                    let catClass = 'cat-main';
+                    if(a.category.includes('下界')) catClass = 'cat-nether';
+                    else if(a.category.includes('末地')) catClass = 'cat-end';
+                    else if(a.category.includes('冒险')) catClass = 'cat-adventure';
+                    else if(a.category.includes('农牧')) catClass = 'cat-husbandry';
+                    
+                    return `
+                    <div class="card card-adv" onclick="showDetail('adv', '${a.id}')">
+                        <div class="card-header">
+                            <div>
+                                <span class="category-tag ${catClass}">${a.category || '准则'}</span>
+                                <div class="card-title" style="color: var(--mc-cyan); margin-top: 4px;">${a.name}</div>
+                            </div>
+                        </div>
+                        <div class="id-block" onclick="event.stopPropagation(); copyText('${a.id}')">${a.id}</div>
+                        <div class="card-desc" style="margin-top: 8px;">${a.desc || ''}</div>
+                        ${a.condition ? `<div style="margin-top: 8px; font-size: 0.8rem; color: #64748b;"><i class="fas fa-check-circle" style="color: var(--mc-green);"></i> ${a.condition}</div>` : ''}
+                    </div>
+                `}).join('');
+                break;
+        }
+        
+        if(html === '') {
+            html = `
+                <div class="empty-state">
+                    <div style="font-size: 4rem; margin-bottom: 16px;">🔍</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">未找到数据</div>
+                    <div style="font-size: 0.9rem; color: #64748b;">请上传文件或更改搜索条件</div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    }
+    
+    function updateFilters() {
+        const container = document.getElementById('filters');
+        let html = '<div class="chip active" onclick="setFilter(\'all\')">全部</div>';
+        
+        if(currentTab === 'commands') {
+            const versions = {};
+            data.commands.forEach(c => {
+                versions[c.source] = (versions[c.source] || 0) + 1;
+            });
+            Object.entries(versions).forEach(([v, n]) => {
+                if(v !== 'unknown') {
+                    const label = versionMap[v] || v;
+                    html += `<div class="chip" onclick="setFilter('${v}')">${label} (${n})</div>`;
+                }
+            });
+        } else if(currentTab === 'blocks') {
+            html += `<div class="chip" onclick="setFilter('脉冲型')">脉冲型</div>`;
+            html += `<div class="chip" onclick="setFilter('循环型')">循环型</div>`;
+            html += `<div class="chip" onclick="setFilter('连锁型')">连锁型</div>`;
+        } else if(currentTab === 'redstone') {
+            // 从数据中提取所有类型
+            const types = new Set();
+            data.redstone.forEach(r => {
+                if(r.type) {
+                    // 分割"电源元件 / 红石电源"这样的格式
+                    r.type.split(/[\/,]/).forEach(t => {
+                        types.add(t.trim());
+                    });
+                }
+            });
+            types.forEach(t => {
+                if(t) html += `<div class="chip" onclick="setFilter('${t}')">${t}</div>`;
+            });
+        } else if(currentTab === 'items') {
+            const cats = {};
+            data.items.forEach(i => { 
+                if(i.category) cats[i.category] = (cats[i.category] || 0) + 1; 
+            });
+            Object.entries(cats).forEach(([c, n]) => {
+                html += `<div class="chip" onclick="setFilter('${c}')">${c} (${n})</div>`;
+            });
+        } else if(currentTab === 'advancements') {
+            const cats = {};
+            data.advancements.forEach(a => { 
+                if(a.category) cats[a.category] = (cats[a.category] || 0) + 1; 
+            });
+            Object.entries(cats).forEach(([c, n]) => {
+                html += `<div class="chip" onclick="setFilter('${c}')">${c} (${n})</div>`;
+            });
+        }
+        
+        container.innerHTML = html;
+    }
+    
+    function setFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        renderContent();
+    }
+    
+    function handleSearch() {
+        renderContent();
+    }
+    
+    function showDetail(type, id, source) {
+        const modal = document.getElementById('modal');
+        const body = document.getElementById('modal-body');
+        let content = '';
+        
+        if(type === 'cmd') {
+            const cmd = Array.from(data.commands.values()).find(c => c.name === id && c.source === source);
+            const versionText = cmd.versionRange.min ? 
+                `${cmd.versionRange.min}${cmd.versionRange.max === '+' ? '+' : '~' + cmd.versionRange.max}` : '';
+            content = `
+                <h2 style="font-family: VT323, monospace; font-size: 2.5rem; color: var(--mc-green); margin-bottom: 24px;">${cmd.name}</h2>
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <span style="background: rgba(93,140,58,0.2); color: var(--mc-light-green); padding: 6px 12px; border-radius: 8px; font-size: 0.9rem;">${versionMap[cmd.source] || cmd.source}</span>
+                    ${versionText ? `<span style="background: rgba(251,191,36,0.2); color: var(--mc-gold); padding: 6px 12px; border-radius: 8px; font-size: 0.9rem;"><i class="fas fa-code-branch"></i> ${versionText}</span>` : ''}
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">简介</div>
+                    <div style="line-height: 1.6;">${cmd.desc || '暂无'}</div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">语法</div>
+                    <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 10px; font-family: JetBrains Mono, monospace; color: var(--mc-gold); border: 1px solid rgba(251,191,36,0.2);">${cmd.syntax}</div>
+                </div>
+                ${cmd.examples.length ? `
+                    <div>
+                        <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 8px;">示例</div>
+                        ${cmd.examples.map(e => `<div style="background: rgba(93,140,58,0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px; font-family: JetBrains Mono, monospace; cursor: pointer;" onclick="copyText('${e}')">${e}</div>`).join('')}
+                    </div>
+                ` : ''}
+            `;
+        } else if(type === 'adv') {
+            const adv = data.advancements.find(a => a.id === id);
+            let catClass = 'cat-main';
+            if(adv.category.includes('下界')) catClass = 'cat-nether';
+            else if(adv.category.includes('末地')) catClass = 'cat-end';
+            else if(adv.category.includes('冒险')) catClass = 'cat-adventure';
+            else if(adv.category.includes('农牧')) catClass = 'cat-husbandry';
+            
+            content = `
+                <h2 style="font-family: VT323, monospace; font-size: 2.5rem; color: var(--mc-cyan); margin-bottom: 16px;">${adv.name}</h2>
+                <div style="margin-bottom: 16px;">
+                    <span class="category-tag ${catClass}">${adv.category || '准则'}</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 10px; font-family: JetBrains Mono, monospace; color: var(--mc-cyan); margin-bottom: 24px; cursor: pointer;" onclick="copyText('${adv.id}')">${adv.id}</div>
+                <div style="margin-bottom: 16px;"><span style="color: #64748b;">简介:</span> ${adv.desc || '暂无'}</div>
+                ${adv.condition ? `<div style="margin-bottom: 16px;"><span style="color: #64748b;">条件:</span> ${adv.condition}</div>` : ''}
+            `;
+        } else if(type === 'redstone') {
+            const rs = data.redstone.find(r => r.name === id);
+            content = `
+                <h2 style="font-family: VT323, monospace; font-size: 2.5rem; color: var(--mc-red); margin-bottom: 16px;">${rs.name}</h2>
+                ${rs.type ? `<div style="margin-bottom: 16px;"><span class="tag tag-red">${rs.type}</span></div>` : ''}
+                <div style="margin-bottom: 16px;"><span style="color: #64748b;">功能:</span> ${rs.desc || '暂无'}</div>
+                ${rs.features.length ? `
+                    <div style="margin-bottom: 16px;">
+                        <div style="color: #64748b; margin-bottom: 8px;">特性:</div>
+                        ${rs.features.map(f => `<div style="padding: 8px; background: rgba(220,38,38,0.1); border-radius: 6px; margin-bottom: 6px;">${f}</div>`).join('')}
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        body.innerHTML = content;
+        modal.style.display = 'block';
+    }
+    
+    function closeModal(e) {
+        if(!e || e.target.id === 'modal') {
+            document.getElementById('modal').style.display = 'none';
+        }
+    }
+    
+    function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => showToast('✓ 已复制'));
+    }
+    
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    
+    function updateStats() {
+        document.getElementById('badge-cmd').textContent = data.commands.size;
+        document.getElementById('badge-block').textContent = data.blocks.length;
+        document.getElementById('badge-redstone').textContent = data.redstone.length;
+        document.getElementById('badge-item').textContent = data.items.length;
+        document.getElementById('badge-adv').textContent = data.advancements.length;
+        
+        const total = data.commands.size + data.blocks.length + data.redstone.length + data.items.length + data.advancements.length;
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-cmd').textContent = data.commands.size;
+    }
+    
+    // 拖拽上传
+    const dropZone = document.getElementById('dropZone');
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--mc-green)'; };
+    dropZone.ondragleave = () => { dropZone.style.borderColor = 'rgba(93,140,58,0.3)'; };
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        document.getElementById('fileInput').files = e.dataTransfer.files;
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    };
+    </script>
+</body>
+</html>
