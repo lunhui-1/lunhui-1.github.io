@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我的世界全版本指令辅助 | 轮回道尘</title>
+    <title>我的世界全版本指令辅助 v1.17.9 beta | 轮回道尘</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - 建议生产环境使用构建后的CSS文件 -->
+    <script src="https://cdn.tailwindcss.com" onerror="console.warn('Tailwind CDN加载失败，使用备用样式')"></script>
     
     <!-- JSZip & FileSaver -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -24,11 +24,83 @@
     <!-- Three.js for 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- SkinView3D -->
-    <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.1/dist/skinview3d.min.js"></script>
+    <!-- ==================== 主题背景系统所需库 ==================== -->
+    <!-- tsParticles - 粒子效果 -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    <!-- Canvas Nest.js - 连线粒子 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.min.js"></script>
+    <!-- Granim.js - 渐变动画 -->
+    <script src="https://cdn.jsdelivr.net/npm/granim@2.0.0/dist/granim.min.js"></script>
+    <!-- Vanta.js - 3D背景 -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.waves.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.fog.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.birds.min.js"></script>
+    <!-- Rellax.js - 视差滚动 -->
+    <script src="https://cdn.jsdelivr.net/npm/rellax@1.12.1/rellax.min.js"></script>
+    <!-- Ripples.js - 水波纹 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery.ripples@0.6.3/dist/jquery.ripples-min.js"></script>
+    <!-- jQuery (Ripples.js依赖) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <!-- WebGL-Fluid-Simulation - 流体模拟 -->
+    <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.2.0/dist/fluid.min.js"></script>
+    <!-- Fluid-JS - 流体效果 -->
+    <script src="https://cdn.jsdelivr.net/npm/fluid-js@1.2.0/dist/fluid.min.js"></script>
+    <!-- Hydra - 实时Shader -->
+    <script src="https://cdn.jsdelivr.net/npm/hydra-synth@1.3.29/dist/hydra-synth.min.js"></script>
     
-    <!-- NBTify -->
-    <script src="https://cdn.jsdelivr.net/npm/nbtify@2.2.0/dist/index.umd.min.js"></script>
+    <!-- SkinView3D - 多CDN源和降级方案 -->
+    <script>
+        // 动态加载脚本辅助函数
+        function loadScriptWithFallback(urls, onSuccess, onError) {
+            if (urls.length === 0) {
+                if (onError) onError();
+                return;
+            }
+            var script = document.createElement('script');
+            script.src = urls[0];
+            script.onload = function() { if (onSuccess) onSuccess(); };
+            script.onerror = function() {
+                console.warn('CDN加载失败，尝试下一个: ' + urls[0]);
+                loadScriptWithFallback(urls.slice(1), onSuccess, onError);
+            };
+            document.head.appendChild(script);
+        }
+        
+        // 加载 SkinView3D (多CDN源)
+        loadScriptWithFallback([
+            'https://cdn.jsdelivr.net/npm/skinview3d@3.0.1/dist/skinview3d.min.js',
+            'https://unpkg.com/skinview3d@3.0.1/dist/skinview3d.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/skinview3d/3.0.1/skinview3d.min.js'
+        ], function() {
+            console.log('✓ SkinView3D 加载成功');
+        }, function() {
+            console.warn('✗ SkinView3D 所有CDN源加载失败，皮肤预览功能将不可用');
+            // 创建全局占位对象避免错误
+            window.skinview3d = window.skinview3d || {
+                SkinViewer: function() { console.warn('SkinView3D未加载'); },
+                OrbitControls: function() {},
+                WalkingAnimation: function() {},
+                RunningAnimation: function() {},
+                FlyingAnimation: function() {}
+            };
+        });
+        
+        // 加载 NBTify (多CDN源)
+        loadScriptWithFallback([
+            'https://cdn.jsdelivr.net/npm/nbtify@2.2.0/dist/index.umd.min.js',
+            'https://unpkg.com/nbtify@2.2.0/dist/index.umd.min.js'
+        ], function() {
+            console.log('✓ NBTify 加载成功');
+        }, function() {
+            console.warn('✗ NBTify 所有CDN源加载失败，NBT编辑器功能将不可用');
+            // 创建全局占位对象避免错误
+            window.nbtify = window.nbtify || {
+                parse: function() { return Promise.reject(new Error('NBTify未加载')); },
+                write: function() { return Promise.reject(new Error('NBTify未加载')); }
+            };
+        });
+    </script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -108,6 +180,30 @@
             10% { opacity: 0.8; } 
             90% { opacity: 0.8; } 
             100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } 
+        }
+        
+        /* 主题切换过渡效果 */
+        body {
+            transition: background-color 0.5s ease;
+        }
+        
+        .theme-transition {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* 主题背景层 */
+        #theme-particles, #matrix-canvas, #granim-canvas, #three-canvas, 
+        #fluid-canvas, #hydra-canvas, #canvas-nest {
+            transition: opacity 0.5s ease;
+        }
+        
+        /* 移动端降级 - 减少动画 */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
         
         /* Toolbar */
@@ -1137,7 +1233,7 @@
             </a>
             <div class="logo-text">
                 <h1 data-i18n="title">MC游戏辅助</h1>
-                <span>v1.16.9 data版</span><br>
+                <span>v1.17.9 beta版</span><br>
                 <span>轮回道尘制作</span>
             </div>
         </div>
@@ -1341,6 +1437,96 @@
         </div>
     </nav>
 
+    <!-- Console Feedback & Error Handling -->
+    <script>
+    // ==================== F12 Console Feedback ====================
+    (function() {
+        // 控制台样式
+        var consoleStyles = {
+            header: 'font-size: 24px; font-weight: bold; color: #5D8C3A; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);',
+            subheader: 'font-size: 14px; color: #7EB356;',
+            text: 'font-size: 12px; color: #94a3b8;',
+            link: 'font-size: 13px; color: #60a5fa; text-decoration: underline; cursor: pointer;',
+            warning: 'font-size: 12px; color: #fbbf24;',
+            error: 'font-size: 12px; color: #f87171;'
+        };
+        
+        // 打印欢迎信息
+        console.log('%c🎮 MC指令辅助 v1.17.9 beta', consoleStyles.header);
+        console.log('%c轮回道尘制作', consoleStyles.subheader);
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', consoleStyles.text);
+        console.log('%c发现Bug或有建议？欢迎反馈:', consoleStyles.text);
+        console.log('%chttps://github.com/lunhui-1/lunhui-1.github.io/discussions/1', consoleStyles.link);
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', consoleStyles.text);
+        
+        // F12检测
+        var devtoolsOpened = false;
+        var threshold = 160;
+        
+        function detectDevTools() {
+            var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            
+            if ((widthThreshold || heightThreshold) && !devtoolsOpened) {
+                devtoolsOpened = true;
+                console.log('%c👋 嗨，开发者！', 'font-size: 16px; color: #5D8C3A; font-weight: bold;');
+                console.log('%c如果你发现了Bug或有改进建议，请访问:', 'font-size: 12px; color: #94a3b8;');
+                console.log('%c👉 https://github.com/lunhui-1/lunhui-1.github.io/discussions/1', 'font-size: 13px; color: #60a5fa; text-decoration: underline; background: rgba(96,165,250,0.1); padding: 4px 8px; border-radius: 4px;');
+                console.log('%c你的反馈对我们非常重要！', 'font-size: 12px; color: #7EB356;');
+            }
+        }
+        
+        // 使用多种方式检测开发者工具
+        window.addEventListener('resize', detectDevTools);
+        setInterval(detectDevTools, 1000);
+        
+        // 捕获常见的库加载错误
+        window.addEventListener('error', function(e) {
+            // 忽略特定库的错误
+            var ignoredPatterns = [
+                'canvas-nest',
+                'jquery.ripples',
+                'simplex-noise',
+                'ISequencerEventData',
+                'getComputedStyle',
+                'exports is not defined',
+                'Module is not defined'
+            ];
+            
+            var errorMsg = e.message || '';
+            var filename = e.filename || '';
+            
+            for (var i = 0; i < ignoredPatterns.length; i++) {
+                if (errorMsg.indexOf(ignoredPatterns[i]) !== -1 || 
+                    filename.indexOf(ignoredPatterns[i]) !== -1) {
+                    console.warn('[已捕获并忽略] 非关键错误: ' + errorMsg);
+                    e.preventDefault();
+                    return true;
+                }
+            }
+            
+            // 其他错误正常显示
+            console.error('JavaScript错误:', errorMsg, '在', filename);
+        }, true);
+        
+        // 修复常见的模块系统错误
+        if (typeof exports === 'undefined') {
+            window.exports = {};
+        }
+        if (typeof module === 'undefined') {
+            window.module = { exports: {} };
+        }
+        if (typeof define === 'undefined') {
+            window.define = function(name, deps, factory) {
+                if (typeof factory === 'function') {
+                    factory();
+                }
+            };
+            window.define.amd = true;
+        }
+    })();
+    </script>
+    
     <script>
     // ==================== Global Variables & Constants ====================
     const STORAGE_KEY = 'mc_command_helper_data_v3';
@@ -1349,13 +1535,26 @@
     
     // App State
     const appState = {
-        theme: 'dark',
+        theme: 'mc_classic',
         language: 'zh-CN',
         shortcuts: true,
         autoSave: true,
         errorReporting: true,
         compactMode: false,
-        touchOptimized: false
+        touchOptimized: false,
+        reducedMotion: false
+    };
+    
+    // 旧主题名称映射到新主题系统
+    const THEME_LEGACY_MAP = {
+        'dark': 'mc_classic',
+        'light': 'gradient_flow',
+        'ocean': 'ocean_depths',
+        'nether': 'matrix_rain',
+        'forest': 'mc_classic',
+        'purple': 'starry_night',
+        'gold': 'gradient_flow',
+        'midnight': 'starry_night'
     };
     
     // Data Storage
@@ -1730,49 +1929,939 @@
         }
     };
     
-    // ==================== Theme Definitions ====================
-    const themes = {
-        dark: { 
-            '--bg-dark': '#0a0f1c', '--glass-bg': 'rgba(20, 25, 40, 0.95)', '--mc-green': '#5D8C3A',
-            '--mc-dark-green': '#3D6E2E', '--mc-light-green': '#7EB356',
-            icon: '🌙', name: '暗黑主题'
+    // ==================== 卡密验证系统 ====================
+    const KEY_STORAGE = 'mc_theme_keys_v1';
+    const PREMIUM_THEMES_KEY = 'mc_premium_themes_unlocked';
+    
+    // 卡密管理器
+    const KeyManager = {
+        // 获取存储的卡密
+        getStoredKeys() {
+            try {
+                const data = localStorage.getItem(KEY_STORAGE);
+                return data ? JSON.parse(data) : [];
+            } catch(e) {
+                return [];
+            }
         },
-        light: { 
-            '--bg-dark': '#f8fafc', '--glass-bg': 'rgba(255, 255, 255, 0.95)', '--mc-green': '#16a34a',
-            '--mc-dark-green': '#15803d', '--mc-light-green': '#22c55e',
-            icon: '☀️', name: '亮色主题'
+        
+        // 验证卡密
+        validateKey(inputKey) {
+            const keys = this.getStoredKeys();
+            const normalizedKey = inputKey.replace(/-/g, '').toUpperCase();
+            
+            // 查找匹配的有效卡密
+            const validKey = keys.find(k => {
+                const storedKey = k.key.replace(/-/g, '').toUpperCase();
+                return storedKey === normalizedKey && !k.used && (!k.expiry || new Date(k.expiry) > new Date());
+            });
+            
+            if (validKey) {
+                // 标记为已使用
+                validKey.used = true;
+                validKey.usedDate = new Date().toISOString();
+                localStorage.setItem(KEY_STORAGE, JSON.stringify(keys));
+                
+                // 解锁高级主题
+                this.unlockPremiumThemes();
+                return { success: true, key: validKey };
+            }
+            
+            return { success: false, message: '卡密无效或已过期' };
         },
-        ocean: { 
-            '--bg-dark': '#0c1e2e', '--glass-bg': 'rgba(15, 35, 55, 0.95)', '--mc-green': '#0ea5e9',
-            '--mc-dark-green': '#0284c7', '--mc-light-green': '#38bdf8',
-            icon: '🌊', name: '海洋主题'
+        
+        // 检查是否已解锁高级主题
+        isPremiumUnlocked() {
+            return localStorage.getItem(PREMIUM_THEMES_KEY) === 'true';
         },
-        nether: { 
-            '--bg-dark': '#1a0c0c', '--glass-bg': 'rgba(40, 20, 20, 0.95)', '--mc-green': '#dc2626',
-            '--mc-dark-green': '#b91c1c', '--mc-light-green': '#ef4444',
-            icon: '🔥', name: '下界主题'
+        
+        // 解锁高级主题
+        unlockPremiumThemes() {
+            localStorage.setItem(PREMIUM_THEMES_KEY, 'true');
         },
-        forest: { 
-            '--bg-dark': '#0c1f0c', '--glass-bg': 'rgba(20, 45, 20, 0.95)', '--mc-green': '#22c55e',
-            '--mc-dark-green': '#16a34a', '--mc-light-green': '#4ade80',
-            icon: '🌳', name: '森林主题'
-        },
-        purple: { 
-            '--bg-dark': '#1a0c2e', '--glass-bg': 'rgba(35, 20, 55, 0.95)', '--mc-green': '#9333ea',
-            '--mc-dark-green': '#7c3aed', '--mc-light-green': '#a855f7',
-            icon: '💜', name: '紫色主题'
-        },
-        gold: { 
-            '--bg-dark': '#1c1505', '--glass-bg': 'rgba(45, 35, 10, 0.95)', '--mc-green': '#eab308',
-            '--mc-dark-green': '#ca8a04', '--mc-light-green': '#facc15',
-            icon: '🏆', name: '黄金主题'
-        },
-        midnight: { 
-            '--bg-dark': '#020617', '--glass-bg': 'rgba(15, 23, 42, 0.98)', '--mc-green': '#6366f1',
-            '--mc-dark-green': '#4f46e5', '--mc-light-green': '#818cf8',
-            icon: '🌌', name: '午夜主题'
+        
+        // 重置解锁状态（调试用）
+        resetUnlock() {
+            localStorage.removeItem(PREMIUM_THEMES_KEY);
         }
     };
+    
+    // ==================== 主题管理器 ====================
+    const ThemeManager = {
+        currentTheme: 'mc_classic',
+        backgroundInstance: null,
+        particlesInstance: null,
+        
+        // 基础主题（免费）
+        basicThemes: {
+            mc_classic: {
+                id: 'mc_classic',
+                name: 'Minecraft经典',
+                icon: '⛏️',
+                type: 'basic',
+                description: '经典Minecraft绿色粒子效果',
+                colors: {
+                    '--bg-dark': '#0a0f1c',
+                    '--glass-bg': 'rgba(20, 25, 40, 0.95)',
+                    '--mc-green': '#5D8C3A',
+                    '--mc-dark-green': '#3D6E2E',
+                    '--mc-light-green': '#7EB356'
+                },
+                init: () => ThemeEffects.initMinecraftClassic()
+            },
+            starry_night: {
+                id: 'starry_night',
+                name: '星空之夜',
+                icon: '✨',
+                type: 'basic',
+                description: 'tsParticles实现的美丽星空',
+                colors: {
+                    '--bg-dark': '#0a0a1a',
+                    '--glass-bg': 'rgba(20, 20, 40, 0.95)',
+                    '--mc-green': '#6366f1',
+                    '--mc-dark-green': '#4f46e5',
+                    '--mc-light-green': '#818cf8'
+                },
+                init: () => ThemeEffects.initStarryNight()
+            },
+            matrix_rain: {
+                id: 'matrix_rain',
+                name: '数字矩阵',
+                icon: '🖥️',
+                type: 'basic',
+                description: '经典代码雨效果',
+                colors: {
+                    '--bg-dark': '#000000',
+                    '--glass-bg': 'rgba(10, 20, 10, 0.95)',
+                    '--mc-green': '#00ff00',
+                    '--mc-dark-green': '#00cc00',
+                    '--mc-light-green': '#66ff66'
+                },
+                init: () => ThemeEffects.initMatrixRain()
+            },
+            gradient_flow: {
+                id: 'gradient_flow',
+                name: '渐变流光',
+                icon: '🌈',
+                type: 'basic',
+                description: 'Granim.js动态渐变',
+                colors: {
+                    '--bg-dark': '#1a0a2e',
+                    '--glass-bg': 'rgba(40, 20, 60, 0.95)',
+                    '--mc-green': '#a855f7',
+                    '--mc-dark-green': '#9333ea',
+                    '--mc-light-green': '#c084fc'
+                },
+                init: () => ThemeEffects.initGradientFlow()
+            },
+            ocean_depths: {
+                id: 'ocean_depths',
+                name: '深海世界',
+                icon: '🌊',
+                type: 'basic',
+                description: '宁静的深海蓝色调',
+                colors: {
+                    '--bg-dark': '#0c1e2e',
+                    '--glass-bg': 'rgba(15, 35, 55, 0.95)',
+                    '--mc-green': '#0ea5e9',
+                    '--mc-dark-green': '#0284c7',
+                    '--mc-light-green': '#38bdf8'
+                },
+                init: () => ThemeEffects.initOceanDepths()
+            },
+            minimal_dark: {
+                id: 'minimal_dark',
+                name: '极简暗黑',
+                icon: '🌑',
+                type: 'basic',
+                description: '简洁优雅的暗色主题',
+                colors: {
+                    '--bg-dark': '#0f0f0f',
+                    '--glass-bg': 'rgba(30, 30, 30, 0.95)',
+                    '--mc-green': '#10b981',
+                    '--mc-dark-green': '#059669',
+                    '--mc-light-green': '#34d399'
+                },
+                init: () => ThemeEffects.initMinimalDark()
+            }
+        },
+        
+        // 高级主题（需卡密解锁）
+        premiumThemes: {
+            cube_world_3d: {
+                id: 'cube_world_3d',
+                name: '3D方块世界',
+                icon: '🧊',
+                type: 'premium',
+                description: 'Three.js 3D旋转方块',
+                colors: {
+                    '--bg-dark': '#050505',
+                    '--glass-bg': 'rgba(20, 20, 20, 0.9)',
+                    '--mc-green': '#5D8C3A',
+                    '--mc-dark-green': '#3D6E2E',
+                    '--mc-light-green': '#7EB356'
+                },
+                init: () => ThemeEffects.initCubeWorld3D()
+            },
+            fluid_simulation: {
+                id: 'fluid_simulation',
+                name: '流体模拟',
+                icon: '💧',
+                type: 'premium',
+                description: 'WebGL流体模拟效果',
+                colors: {
+                    '--bg-dark': '#000510',
+                    '--glass-bg': 'rgba(10, 20, 40, 0.9)',
+                    '--mc-green': '#06b6d4',
+                    '--mc-dark-green': '#0891b2',
+                    '--mc-light-green': '#22d3ee'
+                },
+                init: () => ThemeEffects.initFluidSimulation()
+            },
+            neural_network: {
+                id: 'neural_network',
+                name: '神经网络',
+                icon: '🧠',
+                type: 'premium',
+                description: 'Canvas Nest增强版连线粒子',
+                colors: {
+                    '--bg-dark': '#0a0a0a',
+                    '--glass-bg': 'rgba(20, 20, 20, 0.95)',
+                    '--mc-green': '#10b981',
+                    '--mc-dark-green': '#059669',
+                    '--mc-light-green': '#34d399'
+                },
+                init: () => ThemeEffects.initNeuralNetwork()
+            },
+            cyberpunk_city: {
+                id: 'cyberpunk_city',
+                name: '赛博朋克',
+                icon: '🌃',
+                type: 'premium',
+                description: '霓虹Shader赛博风格',
+                colors: {
+                    '--bg-dark': '#0a0014',
+                    '--glass-bg': 'rgba(40, 10, 60, 0.9)',
+                    '--mc-green': '#f0abfc',
+                    '--mc-dark-green': '#e879f9',
+                    '--mc-light-green': '#f5d0fe'
+                },
+                init: () => ThemeEffects.initCyberpunkCity()
+            },
+            water_ripples: {
+                id: 'water_ripples',
+                name: '水波涟漪',
+                icon: '💫',
+                type: 'premium',
+                description: 'Ripples.js交互式水波纹',
+                colors: {
+                    '--bg-dark': '#001a33',
+                    '--glass-bg': 'rgba(10, 40, 70, 0.95)',
+                    '--mc-green': '#0ea5e9',
+                    '--mc-dark-green': '#0284c7',
+                    '--mc-light-green': '#38bdf8'
+                },
+                init: () => ThemeEffects.initWaterRipples()
+            },
+            parallax_stars: {
+                id: 'parallax_stars',
+                name: '视差星空',
+                icon: '🌠',
+                type: 'premium',
+                description: 'Rellax.js视差滚动星空',
+                colors: {
+                    '--bg-dark': '#0f0a1e',
+                    '--glass-bg': 'rgba(30, 20, 50, 0.95)',
+                    '--mc-green': '#a78bfa',
+                    '--mc-dark-green': '#8b5cf6',
+                    '--mc-light-green': '#c4b5fd'
+                },
+                init: () => ThemeEffects.initParallaxStars()
+            },
+            aurora_borealis: {
+                id: 'aurora_borealis',
+                name: '极光之境',
+                icon: '🌌',
+                type: 'premium',
+                description: 'Vanta.js极光效果',
+                colors: {
+                    '--bg-dark': '#0a1628',
+                    '--glass-bg': 'rgba(20, 40, 60, 0.9)',
+                    '--mc-green': '#22d3ee',
+                    '--mc-dark-green': '#06b6d4',
+                    '--mc-light-green': '#67e8f9'
+                },
+                init: () => ThemeEffects.initAuroraBorealis()
+            },
+            quantum_field: {
+                id: 'quantum_field',
+                name: '量子场域',
+                icon: '⚛️',
+                type: 'premium',
+                description: 'Hydra实时Shader效果',
+                colors: {
+                    '--bg-dark': '#000000',
+                    '--glass-bg': 'rgba(10, 10, 10, 0.9)',
+                    '--mc-green': '#fbbf24',
+                    '--mc-dark-green': '#f59e0b',
+                    '--mc-light-green': '#fcd34d'
+                },
+                init: () => ThemeEffects.initQuantumField()
+            },
+            vanta_birds: {
+                id: 'vanta_birds',
+                name: '飞鸟世界',
+                icon: '🕊️',
+                type: 'premium',
+                description: 'Vanta.js 3D飞鸟群',
+                colors: {
+                    '--bg-dark': '#0f172a',
+                    '--glass-bg': 'rgba(30, 41, 59, 0.95)',
+                    '--mc-green': '#60a5fa',
+                    '--mc-dark-green': '#3b82f6',
+                    '--mc-light-green': '#93c5fd'
+                },
+                init: () => ThemeEffects.initVantaBirds()
+            },
+            wave_fog: {
+                id: 'wave_fog',
+                name: '迷雾波浪',
+                icon: '🌫️',
+                type: 'premium',
+                description: 'Vanta.js迷雾波浪',
+                colors: {
+                    '--bg-dark': '#1a1a2e',
+                    '--glass-bg': 'rgba(40, 40, 60, 0.9)',
+                    '--mc-green': '#8b5cf6',
+                    '--mc-dark-green': '#7c3aed',
+                    '--mc-light-green': '#a78bfa'
+                },
+                init: () => ThemeEffects.initWaveFog()
+            }
+        },
+        
+        // 获取所有主题
+        getAllThemes() {
+            return { ...this.basicThemes, ...this.premiumThemes };
+        },
+        
+        // 切换主题
+        switchTheme(themeId) {
+            const theme = this.getAllThemes()[themeId];
+            if (!theme) return false;
+            
+            // 检查是否需要解锁
+            if (theme.type === 'premium' && !KeyManager.isPremiumUnlocked()) {
+                return { success: false, needUnlock: true };
+            }
+            
+            // 清理旧主题效果
+            this.cleanup();
+            
+            // 应用新主题颜色
+            this.applyColors(theme.colors);
+            
+            // 初始化主题效果
+            if (theme.init) {
+                setTimeout(() => theme.init(), 100);
+            }
+            
+            this.currentTheme = themeId;
+            appState.theme = themeId;
+            saveSettings();
+            
+            return { success: true };
+        },
+        
+        // 应用颜色变量
+        applyColors(colors) {
+            Object.entries(colors).forEach(([key, value]) => {
+                if (key.startsWith('--')) {
+                    document.documentElement.style.setProperty(key, value);
+                }
+            });
+        },
+        
+        // 清理当前主题效果
+        cleanup() {
+            // 清理tsParticles
+            if (window.tsParticles && this.particlesInstance) {
+                window.tsParticles.dom().forEach(container => container.destroy());
+                this.particlesInstance = null;
+            }
+            
+            // 清理Vanta
+            if (this.backgroundInstance && this.backgroundInstance.destroy) {
+                this.backgroundInstance.destroy();
+                this.backgroundInstance = null;
+            }
+            
+            // 清理Canvas Nest
+            const nestCanvas = document.getElementById('canvas-nest');
+            if (nestCanvas) nestCanvas.remove();
+            
+            // 清理Granim
+            const granimCanvas = document.getElementById('granim-canvas');
+            if (granimCanvas) granimCanvas.remove();
+            
+            // 清理Three.js
+            const threeCanvas = document.getElementById('three-canvas');
+            if (threeCanvas) threeCanvas.remove();
+            
+            // 清理Hydra
+            const hydraCanvas = document.getElementById('hydra-canvas');
+            if (hydraCanvas) hydraCanvas.remove();
+            
+            // 清理流体模拟
+            const fluidCanvas = document.getElementById('fluid-canvas');
+            if (fluidCanvas) fluidCanvas.remove();
+            
+            // 清理矩阵雨
+            const matrixCanvas = document.getElementById('matrix-canvas');
+            if (matrixCanvas) matrixCanvas.remove();
+            
+            // 清理水波纹
+            if (window.$ && $.fn.ripples) {
+                $('body').ripples('destroy');
+            }
+            
+            // 清理粒子div
+            const particlesDiv = document.getElementById('theme-particles');
+            if (particlesDiv) particlesDiv.innerHTML = '';
+        }
+    };
+    
+    // ==================== 主题效果实现 ====================
+    const ThemeEffects = {
+        // 确保背景容器存在
+        ensureContainer(id) {
+            let container = document.getElementById(id);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = id;
+                container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;pointer-events:none;';
+                document.body.insertBefore(container, document.body.firstChild);
+            }
+            return container;
+        },
+        
+        // 确保Canvas存在
+        ensureCanvas(id) {
+            let canvas = document.getElementById(id);
+            if (!canvas) {
+                canvas = document.createElement('canvas');
+                canvas.id = id;
+                canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;pointer-events:none;';
+                document.body.insertBefore(canvas, document.body.firstChild);
+            }
+            return canvas;
+        },
+        
+        // 1. Minecraft经典 - 绿色粒子
+        initMinecraftClassic() {
+            const container = this.ensureContainer('theme-particles');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    position: absolute;
+                    width: ${4 + Math.random() * 4}px;
+                    height: ${4 + Math.random() * 4}px;
+                    background: var(--mc-green);
+                    left: ${Math.random() * 100}vw;
+                    top: ${Math.random() * 100}vh;
+                    opacity: ${0.3 + Math.random() * 0.5};
+                    animation: float-up ${10 + Math.random() * 20}s linear infinite;
+                    animation-delay: ${Math.random() * 10}s;
+                    box-shadow: 0 0 10px var(--mc-green);
+                    border-radius: 2px;
+                `;
+                container.appendChild(particle);
+            }
+        },
+        
+        // 2. 星空之夜 - tsParticles
+        async initStarryNight() {
+            const container = this.ensureContainer('theme-particles');
+            container.innerHTML = '';
+            
+            if (!window.tsParticles) return;
+            
+            ThemeManager.particlesInstance = await window.tsParticles.load('theme-particles', {
+                fullScreen: { enable: false },
+                particles: {
+                    number: { value: 150, density: { enable: true, value_area: 800 } },
+                    color: { value: ['#ffffff', '#a78bfa', '#60a5fa', '#fbbf24'] },
+                    shape: { type: 'circle' },
+                    opacity: { value: { min: 0.1, max: 1 }, animation: { enable: true, speed: 0.5 } },
+                    size: { value: { min: 1, max: 3 }, animation: { enable: true, speed: 2 } },
+                    move: { enable: true, speed: 0.3, direction: 'none', random: true },
+                    twinkle: { particles: { enable: true, frequency: 0.05, opacity: 1 } }
+                },
+                interactivity: {
+                    events: { onHover: { enable: true, mode: 'bubble' } },
+                    modes: { bubble: { distance: 100, size: 5 } }
+                }
+            });
+        },
+        
+        // 3. 数字矩阵 - 代码雨
+        initMatrixRain() {
+            const canvas = this.ensureCanvas('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#0f0';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            const interval = setInterval(draw, 35);
+            
+            // 保存清理函数
+            ThemeManager.cleanupFn = () => clearInterval(interval);
+        },
+        
+        // 4. 渐变流光 - Granim.js
+        initGradientFlow() {
+            const canvas = this.ensureCanvas('granim-canvas');
+            
+            if (window.Granim) {
+                ThemeManager.backgroundInstance = new Granim({
+                    element: '#granim-canvas',
+                    direction: 'diagonal',
+                    isPausedWhenNotInView: true,
+                    states: {
+                        'default-state': {
+                            gradients: [
+                                ['#1a0a2e', '#4a148c'],
+                                ['#311b92', '#6a1b9a'],
+                                ['#4a148c', '#1a237e'],
+                                ['#6a1b9a', '#1a0a2e']
+                            ],
+                            transitionSpeed: 5000
+                        }
+                    }
+                });
+            }
+        },
+        
+        // 5. 深海世界
+        initOceanDepths() {
+            const canvas = this.ensureCanvas('fluid-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const bubbles = [];
+            for (let i = 0; i < 30; i++) {
+                bubbles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 20 + 5,
+                    speed: Math.random() * 1 + 0.5,
+                    opacity: Math.random() * 0.3 + 0.1
+                });
+            }
+            
+            let animationId;
+            function animate() {
+                ctx.fillStyle = '#0c1e2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                bubbles.forEach(bubble => {
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(14, 165, 233, ${bubble.opacity})`;
+                    ctx.fill();
+                    
+                    bubble.y -= bubble.speed;
+                    if (bubble.y < -bubble.r) {
+                        bubble.y = canvas.height + bubble.r;
+                        bubble.x = Math.random() * canvas.width;
+                    }
+                });
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+            
+            ThemeManager.cleanupFn = () => cancelAnimationFrame(animationId);
+        },
+        
+        // 6. 极简暗黑
+        initMinimalDark() {
+            // 纯色背景，无特效
+            const container = this.ensureContainer('theme-particles');
+            container.innerHTML = '';
+        },
+        
+        // 7. 3D方块世界 - Three.js
+        initCubeWorld3D() {
+            const canvas = this.ensureCanvas('three-canvas');
+            
+            if (!window.THREE) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // 创建方块
+            const cubes = [];
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const materials = [
+                new THREE.MeshBasicMaterial({ color: 0x5D8C3A, wireframe: true }),
+                new THREE.MeshBasicMaterial({ color: 0x3D6E2E, wireframe: true }),
+                new THREE.MeshBasicMaterial({ color: 0x7EB356, wireframe: true })
+            ];
+            
+            for (let i = 0; i < 20; i++) {
+                const material = materials[Math.floor(Math.random() * materials.length)];
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.x = (Math.random() - 0.5) * 20;
+                cube.position.y = (Math.random() - 0.5) * 20;
+                cube.position.z = (Math.random() - 0.5) * 20;
+                cube.rotation.x = Math.random() * Math.PI;
+                cube.rotation.y = Math.random() * Math.PI;
+                scene.add(cube);
+                cubes.push(cube);
+            }
+            
+            camera.position.z = 10;
+            
+            let animationId;
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                cubes.forEach(cube => {
+                    cube.rotation.x += 0.01;
+                    cube.rotation.y += 0.01;
+                });
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            ThemeManager.backgroundInstance = { 
+                destroy: () => {
+                    cancelAnimationFrame(animationId);
+                    renderer.dispose();
+                }
+            };
+        },
+        
+        // 8. 流体模拟
+        initFluidSimulation() {
+            const canvas = this.ensureCanvas('fluid-canvas');
+            
+            // 简化的流体效果
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            let mouseX = canvas.width / 2, mouseY = canvas.height / 2;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            }, { passive: true });
+            
+            const particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: 0, vy: 0,
+                    life: Math.random() * 100
+                });
+            }
+            
+            let animationId;
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 5, 16, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    const dx = mouseX - p.x;
+                    const dy = mouseY - p.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 200) {
+                        p.vx += dx * 0.001;
+                        p.vy += dy * 0.001;
+                    }
+                    
+                    p.vx *= 0.95;
+                    p.vy *= 0.95;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsl(${180 + p.life}, 80%, 60%)`;
+                    ctx.fill();
+                    
+                    p.life = (p.life + 1) % 360;
+                });
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+            
+            ThemeManager.cleanupFn = () => cancelAnimationFrame(animationId);
+        },
+        
+        // 9. 神经网络 - Canvas Nest
+        initNeuralNetwork() {
+            if (window.CanvasNest) {
+                ThemeManager.backgroundInstance = new window.CanvasNest(document.body, {
+                    color: '10, 185, 129',
+                    count: 150,
+                    zIndex: -2
+                });
+            }
+        },
+        
+        // 10. 赛博朋克 - Shader风格
+        initCyberpunkCity() {
+            const canvas = this.ensureCanvas('fluid-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            let animationId;
+            let time = 0;
+            
+            function drawCyberpunk() {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#0a0014');
+                gradient.addColorStop(1, '#1a0033');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 霓虹网格
+                ctx.strokeStyle = '#e879f9';
+                ctx.lineWidth = 1;
+                const gridSize = 40;
+                const offset = (time * 2) % gridSize;
+                
+                for (let x = 0; x < canvas.width; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.globalAlpha = 0.3 + Math.sin(time * 0.05 + x * 0.01) * 0.2;
+                    ctx.stroke();
+                }
+                
+                for (let y = offset; y < canvas.height; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.globalAlpha = 0.3 + Math.sin(time * 0.03 + y * 0.01) * 0.2;
+                    ctx.stroke();
+                }
+                
+                // 霓虹光柱
+                for (let i = 0; i < 5; i++) {
+                    const x = (canvas.width / 5) * i + Math.sin(time * 0.02 + i) * 50;
+                    const height = 100 + Math.sin(time * 0.03 + i * 0.5) * 50;
+                    const gradient = ctx.createLinearGradient(x, canvas.height - height, x, canvas.height);
+                    gradient.addColorStop(0, 'rgba(232, 121, 249, 0)');
+                    gradient.addColorStop(0.5, 'rgba(232, 121, 249, 0.5)');
+                    gradient.addColorStop(1, 'rgba(232, 121, 249, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x - 20, canvas.height - height, 40, height);
+                }
+                
+                ctx.globalAlpha = 1;
+                time++;
+                animationId = requestAnimationFrame(drawCyberpunk);
+            }
+            
+            drawCyberpunk();
+            ThemeManager.cleanupFn = () => cancelAnimationFrame(animationId);
+        },
+        
+        // 11. 水波纹 - Ripples.js
+        initWaterRipples() {
+            if (window.$ && $.fn.ripples) {
+                $('body').ripples({
+                    resolution: 512,
+                    dropRadius: 20,
+                    perturbance: 0.04
+                });
+                
+                // 自动滴落水滴
+                setInterval(() => {
+                    const $body = $('body');
+                    const x = Math.random() * $body.outerWidth();
+                    const y = Math.random() * $body.outerHeight();
+                    const dropRadius = 20;
+                    const strength = 0.04 + Math.random() * 0.04;
+                    $body.ripples('drop', x, y, dropRadius, strength);
+                }, 2000);
+            }
+        },
+        
+        // 12. 视差星空 - Rellax + 粒子
+        initParallaxStars() {
+            const container = this.ensureContainer('theme-particles');
+            container.innerHTML = '';
+            
+            // 创建多层星星
+            for (let layer = 0; layer < 3; layer++) {
+                const layerDiv = document.createElement('div');
+                layerDiv.className = 'rellax';
+                layerDiv.setAttribute('data-rellax-speed', (layer + 1) * 2);
+                layerDiv.style.cssText = `
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    z-index: ${-layer};
+                `;
+                
+                const count = 30 - layer * 10;
+                for (let i = 0; i < count; i++) {
+                    const star = document.createElement('div');
+                    const size = 2 + (2 - layer) + Math.random() * 2;
+                    star.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        background: ${['#fff', '#a78bfa', '#60a5fa'][layer]};
+                        border-radius: 50%;
+                        left: ${Math.random() * 100}%;
+                        top: ${Math.random() * 100}%;
+                        opacity: ${0.5 + Math.random() * 0.5};
+                        box-shadow: 0 0 ${size * 2}px currentColor;
+                    `;
+                    layerDiv.appendChild(star);
+                }
+                container.appendChild(layerDiv);
+            }
+            
+            // 初始化Rellax
+            if (window.Rellax) {
+                ThemeManager.backgroundInstance = new Rellax('.rellax');
+            }
+        },
+        
+        // 13. 极光之境 - Vanta.js
+        initAuroraBorealis() {
+            if (window.VANTA && window.VANTA.FOG) {
+                ThemeManager.backgroundInstance = window.VANTA.FOG({
+                    el: "body",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    highlightColor: 0x22d3ee,
+                    midtoneColor: 0x0ea5e9,
+                    lowlightColor: 0x0a1628,
+                    baseColor: 0x0a1628,
+                    blurFactor: 0.6,
+                    speed: 2.0,
+                    zoom: 1.5
+                });
+            }
+        },
+        
+        // 14. 量子场域 - Hydra
+        initQuantumField() {
+            const canvas = this.ensureCanvas('hydra-canvas');
+            
+            if (window.Hydra) {
+                const hydra = new Hydra({ canvas, detectAudio: false });
+                
+                // 创建量子场效果
+                osc(4, 0.1, 0.8)
+                    .color(0.9, 0.7, 0.1)
+                    .rotate(0, 0.1)
+                    .pixelate(50 + Math.random() * 50)
+                    .modulate(noise(3), 0.5)
+                    .out();
+                
+                ThemeManager.backgroundInstance = {
+                    destroy: () => {
+                        hydra.hush();
+                    }
+                };
+            }
+        },
+        
+        // 15. Vanta飞鸟
+        initVantaBirds() {
+            if (window.VANTA && window.VANTA.BIRDS) {
+                ThemeManager.backgroundInstance = window.VANTA.BIRDS({
+                    el: "body",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    backgroundColor: 0x0f172a,
+                    color1: 0x60a5fa,
+                    color2: 0x3b82f6,
+                    birdSize: 1.5,
+                    wingSpan: 20.0,
+                    speedLimit: 4.0,
+                    separation: 40.0,
+                    alignment: 40.0,
+                    cohesion: 40.0,
+                    quantity: 3.0
+                });
+            }
+        },
+        
+        // 16. 迷雾波浪
+        initWaveFog() {
+            if (window.VANTA && window.VANTA.WAVES) {
+                ThemeManager.backgroundInstance = window.VANTA.WAVES({
+                    el: "body",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x1a1a2e,
+                    shininess: 30.00,
+                    waveHeight: 15.00,
+                    waveSpeed: 0.75,
+                    zoom: 0.75
+                });
+            }
+        }
+    };
+    
+    // ==================== 兼容旧版本主题系统 ====================
+    const themes = {}; // 占位，防止旧代码报错
     
     const languages = {
         'zh-CN': { name: '中文', flag: '🇨🇳' },
@@ -1834,17 +2923,13 @@
     
     // ==================== Theme System ====================
     function setTheme(themeName) {
-        appState.theme = themeName;
-        const theme = themes[themeName];
-        if(theme) {
-            Object.entries(theme).forEach(([key, value]) => {
-                if(key.startsWith('--')) {
-                    document.documentElement.style.setProperty(key, value);
-                }
-            });
+        // 兼容新旧主题系统
+        const result = ThemeManager.switchTheme(themeName);
+        if (!result.success && result.needUnlock) {
+            showPremiumUnlockDialog();
+            return false;
         }
-        document.body.setAttribute('data-theme', themeName);
-        saveSettings();
+        return true;
     }
     
     function loadTheme() {
@@ -1852,7 +2937,15 @@
         if(saved) {
             const settings = JSON.parse(saved);
             Object.assign(appState, settings);
-            setTheme(appState.theme);
+            // 使用新主题系统加载主题（处理旧主题名称映射）
+            let themeToLoad = appState.theme || 'mc_classic';
+            if (THEME_LEGACY_MAP[themeToLoad]) {
+                themeToLoad = THEME_LEGACY_MAP[themeToLoad];
+            }
+            ThemeManager.switchTheme(themeToLoad);
+        } else {
+            // 默认加载经典主题
+            ThemeManager.switchTheme('mc_classic');
         }
     }
     
@@ -1860,23 +2953,46 @@
         try { localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appState)); } catch(e) {}
     }
     
+    // ==================== 主题设置菜单 ====================
     function showThemeSettings() {
         const modal = document.getElementById('modal');
         const body = document.getElementById('modal-body');
         const isMobile = window.innerWidth <= 1024;
+        const isPremium = KeyManager.isPremiumUnlocked();
         
-        const themeOptions = Object.entries(themes).map(([key, theme]) => `
-            <div onclick="setTheme('${key}'); closeModal();" 
-                 style="cursor: pointer; padding: ${isMobile ? '16px 12px' : '14px'}; background: linear-gradient(135deg, ${theme['--bg-dark']}, ${theme['--glass-bg']}); 
-                        border-radius: 10px; border: 2px solid ${appState.theme === key ? 'var(--mc-green)' : 'transparent'}; 
-                        text-align: center; transition: all 0.2s;"
+        // 生成基础主题选项
+        const basicThemeOptions = Object.values(ThemeManager.basicThemes).map(theme => `
+            <div onclick="handleThemeSelect('${theme.id}')" 
+                 style="cursor: pointer; padding: ${isMobile ? '14px 10px' : '12px'}; 
+                        background: linear-gradient(135deg, ${theme.colors['--bg-dark']}, ${theme.colors['--glass-bg']}); 
+                        border-radius: 10px; border: 2px solid ${ThemeManager.currentTheme === theme.id ? 'var(--mc-green)' : 'transparent'}; 
+                        text-align: center; transition: all 0.2s; position: relative; overflow: hidden;"
                  onmouseover="this.style.transform='translateY(-2px)';"
                  onmouseout="this.style.transform='translateY(0)';">
-                <div style="font-size: ${isMobile ? '2rem' : '1.8rem'}; margin-bottom: 4px;">${theme.icon}</div>
-                <div style="color: #e2e8f0; font-weight: 500; font-size: ${isMobile ? '0.8rem' : '0.85rem'};">${theme.name}</div>
+                <div style="font-size: ${isMobile ? '1.8rem' : '1.5rem'}; margin-bottom: 4px;">${theme.icon}</div>
+                <div style="color: #e2e8f0; font-weight: 500; font-size: ${isMobile ? '0.75rem' : '0.8rem'};">${theme.name}</div>
+                ${ThemeManager.currentTheme === theme.id ? '<i class="fas fa-check" style="position: absolute; top: 4px; right: 4px; color: var(--mc-green); font-size: 0.7rem;"></i>' : ''}
             </div>
         `).join('');
         
+        // 生成高级主题选项
+        const premiumThemeOptions = Object.values(ThemeManager.premiumThemes).map(theme => `
+            <div onclick='${isPremium ? `handleThemeSelect("${theme.id}")` : `showPremiumUnlockDialog()`}' 
+                 style="cursor: ${isPremium ? 'pointer' : 'not-allowed'}; padding: ${isMobile ? '14px 10px' : '12px'}; 
+                        background: linear-gradient(135deg, ${theme.colors['--bg-dark']}, ${theme.colors['--glass-bg']}); 
+                        border-radius: 10px; border: 2px solid ${ThemeManager.currentTheme === theme.id ? 'var(--mc-gold)' : 'transparent'}; 
+                        text-align: center; transition: all 0.2s; position: relative; overflow: hidden;
+                        ${!isPremium ? 'opacity: 0.7;' : ''}"
+                 onmouseover="${isPremium ? 'this.style.transform=\'translateY(-2px)\';' : ''}"
+                 onmouseout="this.style.transform='translateY(0)';">
+                <div style="font-size: ${isMobile ? '1.8rem' : '1.5rem'}; margin-bottom: 4px;">${isPremium ? theme.icon : '🔒'}</div>
+                <div style="color: ${isPremium ? '#e2e8f0' : '#94a3b8'}; font-weight: 500; font-size: ${isMobile ? '0.75rem' : '0.8rem'};">${theme.name}</div>
+                ${ThemeManager.currentTheme === theme.id && isPremium ? '<i class="fas fa-check" style="position: absolute; top: 4px; right: 4px; color: var(--mc-gold); font-size: 0.7rem;"></i>' : ''}
+                ${!isPremium ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; color: var(--mc-gold);">PRO</div>' : ''}
+            </div>
+        `).join('');
+        
+        // 语言选项
         const languageOptions = Object.entries(languages).map(([key, lang]) => `
             <div onclick="setLanguage('${key}'); closeModal();" 
                  style="cursor: pointer; padding: ${isMobile ? '14px 16px' : '10px 14px'}; background: ${appState.language === key ? 'rgba(93,140,58,0.3)' : 'rgba(30,41,59,0.6)'}; 
@@ -1888,7 +3004,7 @@
             </div>
         `).join('');
         
-        // Mobile additional settings
+        // 移动端设置
         const mobileSettings = isMobile ? `
             <div style="background: rgba(30,41,59,0.6); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
                 <h3 style="color: #94a3b8; margin-bottom: 14px; font-size: 0.9rem;">
@@ -1911,17 +3027,64 @@
             </div>
         ` : '';
         
+        // 解锁状态显示
+        const unlockStatus = isPremium ? `
+            <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05)); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-crown" style="color: var(--mc-gold); font-size: 1.2rem;"></i>
+                    <div>
+                        <div style="color: var(--mc-gold); font-weight: 600; font-size: 0.9rem;">高级主题已解锁</div>
+                        <div style="color: #94a3b8; font-size: 0.75rem;">享受全部 10 款高级主题</div>
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <div style="background: rgba(30,41,59,0.6); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; cursor: pointer;"
+                 onclick="showPremiumUnlockDialog()">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-lock" style="color: #94a3b8; font-size: 1.2rem;"></i>
+                        <div>
+                            <div style="color: #e2e8f0; font-weight: 500; font-size: 0.9rem;">解锁高级主题</div>
+                            <div style="color: #94a3b8; font-size: 0.75rem;">使用卡密解锁 10 款精美主题</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: #64748b;"></i>
+                </div>
+            </div>
+        `;
+        
         body.innerHTML = `
             <h2 style="font-family: VT323, monospace; font-size: ${isMobile ? '2rem' : '1.8rem'}; color: var(--mc-gold); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
                 <i class="fas fa-cog"></i> ${t('settings')}
             </h2>
             
+            ${unlockStatus}
+            
+            <!-- 基础主题 -->
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #94a3b8; margin-bottom: 12px; font-size: ${isMobile ? '1rem' : '0.9rem'};">
-                    <i class="fas fa-palette" style="margin-right: 6px;"></i> ${t('theme')}
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(${isMobile ? '2' : '4'}, 1fr); gap: 10px;">
-                    ${themeOptions}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <h3 style="color: #94a3b8; font-size: ${isMobile ? '1rem' : '0.9rem'}; margin: 0;">
+                        <i class="fas fa-palette" style="margin-right: 6px;"></i> 基础主题
+                        <span style="color: var(--mc-green); font-size: 0.75rem; margin-left: 6px;">免费</span>
+                    </h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(${isMobile ? '3' : '6'}, 1fr); gap: 8px;">
+                    ${basicThemeOptions}
+                </div>
+            </div>
+            
+            <!-- 高级主题 -->
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <h3 style="color: #94a3b8; font-size: ${isMobile ? '1rem' : '0.9rem'}; margin: 0;">
+                        <i class="fas fa-gem" style="margin-right: 6px; color: var(--mc-gold);"></i> 高级主题
+                        <span style="color: var(--mc-gold); font-size: 0.75rem; margin-left: 6px;">PRO</span>
+                    </h3>
+                    ${isPremium ? '' : '<span style="font-size: 0.75rem; color: #64748b;">🔒 需解锁</span>'}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(${isMobile ? '3' : '5'}, 1fr); gap: 8px;">
+                    ${premiumThemeOptions}
                 </div>
             </div>
             
@@ -1947,11 +3110,16 @@
                                style="width: ${isMobile ? '22px' : '16px'}; height: ${isMobile ? '22px' : '16px'}; accent-color: var(--mc-green);"> 
                         <span>启用键盘快捷键</span>
                     </label>
+                    <label style="display: flex; align-items: center; gap: 12px; color: #e2e8f0; cursor: pointer; font-size: ${isMobile ? '0.95rem' : '0.9rem'};">
+                        <input type="checkbox" ${appState.reducedMotion ? 'checked' : ''} 
+                               onchange="toggleReducedMotion(this.checked)" 
+                               style="width: ${isMobile ? '22px' : '16px'}; height: ${isMobile ? '22px' : '16px'}; accent-color: var(--mc-green);"> 
+                        <span>减少动画效果</span>
+                    </label>
                 </div>
             </div>
         `;
         
-        // Add responsive styles for modal on mobile
         if(isMobile) {
             body.parentElement.style.maxWidth = '95vw';
             body.parentElement.style.margin = '20px auto';
@@ -1963,6 +3131,126 @@
         }
         
         modal.style.display = 'block';
+    }
+    
+    // 处理主题选择
+    function handleThemeSelect(themeId) {
+        const result = ThemeManager.switchTheme(themeId);
+        if (result.success) {
+            showToast('✨ 主题已切换');
+            closeModal();
+        } else if (result.needUnlock) {
+            showPremiumUnlockDialog();
+        }
+    }
+    
+    // 显示解锁对话框
+    function showPremiumUnlockDialog() {
+        const modal = document.getElementById('modal');
+        const body = document.getElementById('modal-body');
+        const isMobile = window.innerWidth <= 1024;
+        
+        body.innerHTML = `
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: ${isMobile ? '3rem' : '2.5rem'}; margin-bottom: 12px;">💎</div>
+                <h2 style="font-family: VT323, monospace; font-size: ${isMobile ? '1.8rem' : '1.6rem'}; color: var(--mc-gold); margin: 0 0 8px 0;">
+                    解锁高级主题
+                </h2>
+                <p style="color: #94a3b8; font-size: ${isMobile ? '0.9rem' : '0.85rem'}; margin: 0;">
+                    输入16位卡密解锁全部高级主题
+                </p>
+            </div>
+            
+            <div style="background: rgba(30,41,59,0.6); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <input type="text" id="keyInput" placeholder="XXXX-XXXX-XXXX-XXXX" 
+                       style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(93,140,58,0.3); 
+                              border-radius: 8px; padding: 14px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace;
+                              font-size: 1.1rem; text-align: center; letter-spacing: 2px; text-transform: uppercase;"
+                       oninput="formatKeyInput(this)" maxlength="19">
+                <div id="keyError" style="color: #f87171; font-size: 0.8rem; margin-top: 8px; display: none;"></div>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button onclick="closeModal(); showThemeSettings();" 
+                        style="flex: 1; background: rgba(255,255,255,0.1); border: none; color: #e2e8f0; 
+                               padding: 14px; border-radius: 10px; cursor: pointer; font-size: 0.9rem;">
+                    返回
+                </button>
+                <button onclick="validateAndUnlock()" 
+                        style="flex: 2; background: linear-gradient(135deg, var(--mc-green), var(--mc-dark-green)); 
+                               border: none; color: white; padding: 14px; border-radius: 10px; cursor: pointer; 
+                               font-size: 0.95rem; font-weight: 600;">
+                    <i class="fas fa-unlock" style="margin-right: 8px;"></i> 解锁
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px;">高级主题预览</div>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; opacity: 0.6;">
+                    ${Object.values(ThemeManager.premiumThemes).slice(0, 5).map(t => `
+                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                            <div style="font-size: 1.2rem;">${t.icon}</div>
+                            <div style="font-size: 0.65rem; color: #94a3b8; margin-top: 4px;">${t.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+        
+        // 聚焦输入框
+        setTimeout(() => document.getElementById('keyInput')?.focus(), 100);
+    }
+    
+    // 格式化卡密输入
+    function formatKeyInput(input) {
+        let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        let formatted = '';
+        for (let i = 0; i < value.length && i < 16; i++) {
+            if (i > 0 && i % 4 === 0) formatted += '-';
+            formatted += value[i];
+        }
+        input.value = formatted;
+        document.getElementById('keyError').style.display = 'none';
+    }
+    
+    // 验证并解锁
+    function validateAndUnlock() {
+        const input = document.getElementById('keyInput');
+        const errorDiv = document.getElementById('keyError');
+        const key = input.value.trim();
+        
+        if (key.length < 19) {
+            errorDiv.textContent = '请输入完整的16位卡密';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        const result = KeyManager.validateKey(key);
+        
+        if (result.success) {
+            showToast('🎉 高级主题解锁成功！');
+            closeModal();
+            showThemeSettings();
+        } else {
+            errorDiv.textContent = result.message || '卡密无效或已被使用';
+            errorDiv.style.display = 'block';
+            input.style.borderColor = '#f87171';
+            setTimeout(() => input.style.borderColor = '', 2000);
+        }
+    }
+    
+    // 减少动画
+    function toggleReducedMotion(enabled) {
+        appState.reducedMotion = enabled;
+        if (enabled) {
+            ThemeManager.cleanup();
+            // 切换到极简主题
+            ThemeManager.switchTheme('minimal_dark');
+        }
+        saveSettings();
+        showToast(enabled ? '已减少动画效果' : '已恢复动画效果');
     }
     
     // ==================== Navigation ====================
@@ -8724,7 +10012,7 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
             
             <!-- App Info -->
             <div style="text-align: center; padding: 20px; color: #64748b; font-size: 0.8rem;">
-                <div>MC指令辅助 v1.16.9</div>
+                <div>MC指令辅助 v1.17.9 beta</div>
                 <div style="margin-top: 4px;">轮回道尘制作</div>
             </div>
         `;
@@ -8791,6 +10079,8 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
                     failedLibs.push(lib);
                 }
                 console.warn(`库未加载: ${lib.name} (${lib.usage})`);
+            } else {
+                console.log(`✓ ${lib.name} 已加载`);
             }
         }
         
@@ -8805,6 +10095,16 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
         }
         
         return { missingLibs, failedLibs };
+    }
+    
+    // ==================== Console Feedback ====================
+    function showConsoleFeedback() {
+        console.log('%c🎮 MC指令辅助 v1.17.9 beta', 'font-size: 20px; font-weight: bold; color: #5D8C3A;');
+        console.log('%c轮回道尘制作', 'font-size: 14px; color: #7EB356;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #64748b;');
+        console.log('%c发现Bug或有建议？欢迎反馈:', 'color: #94a3b8;');
+        console.log('%chttps://github.com/lunhui-1/lunhui-1.github.io/discussions/1', 'color: #60a5fa; text-decoration: underline;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #64748b;');
     }
     
     function showLibraryWarning(libs, isCritical) {
@@ -8871,6 +10171,9 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
     
     // ==================== Initialization ====================
     window.onload = function() {
+        // 显示控制台反馈
+        showConsoleFeedback();
+        
         // 检查库加载状态
         checkLibraries();
         
