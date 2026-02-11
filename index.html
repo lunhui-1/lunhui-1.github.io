@@ -1016,6 +1016,172 @@
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--mc-green); border-radius: 3px; }
         
+        /* 卡密生成器页面样式 */
+        .keygen-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .keygen-card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+            border: 1px solid rgba(93, 140, 58, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        .keygen-title {
+            font-family: 'VT323', monospace;
+            font-size: 2.5rem;
+            color: var(--mc-gold);
+            margin: 0;
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+            text-align: center;
+        }
+        .keygen-display {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(20, 25, 40, 0.8));
+            border: 2px solid var(--mc-green);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: var(--mc-gold);
+            text-align: center;
+            word-break: break-all;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .keygen-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .keygen-btn-primary {
+            background: linear-gradient(135deg, var(--mc-green), var(--mc-dark-green));
+            border: none;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .keygen-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(93, 140, 58, 0.4);
+        }
+        .keygen-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .keygen-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .keygen-history-item {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(93, 140, 58, 0.1);
+        }
+        .keygen-status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .keygen-status-unused {
+            background: rgba(93, 140, 58, 0.2);
+            color: var(--mc-light-green);
+        }
+        .keygen-status-used {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+        }
+        .keygen-input {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(93, 140, 58, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .keygen-input:focus {
+            outline: none;
+            border-color: var(--mc-green);
+        }
+        .keygen-select {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(93, 140, 58, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+        .keygen-select:focus {
+            outline: none;
+            border-color: var(--mc-green);
+        }
+        .keygen-stats-box {
+            text-align: center;
+            padding: 16px;
+        }
+        .keygen-stats-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .keygen-stats-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        /* 移动端卡密生成器适配 */
+        @media (max-width: 640px) {
+            .keygen-card {
+                padding: 20px;
+            }
+            .keygen-title {
+                font-size: 1.8rem;
+            }
+            .keygen-display {
+                font-size: 1.1rem;
+                padding: 16px;
+                letter-spacing: 2px;
+            }
+            .keygen-btn-primary, .keygen-btn-secondary {
+                min-height: 44px;
+                padding: 12px 20px;
+            }
+            .keygen-input, .keygen-select {
+                min-height: 44px;
+            }
+        }
+        
         /* Responsive */
         @media (max-width: 1024px) {
             .toolbar { display: none; }
@@ -1195,9 +1361,9 @@
             <span class="toolbar-tooltip">主页</span>
         </div>
         
-        <div class="toolbar-item" onclick="switchTool('database', event)" title="数据库">
-            <i class="fas fa-database"></i>
-            <span class="toolbar-tooltip">数据库</span>
+        <div class="toolbar-item" onclick="switchTool('keygen', event)" title="卡密">
+            <i class="fas fa-key"></i>
+            <span class="toolbar-tooltip">卡密</span>
         </div>
         
         <div class="toolbar-item" onclick="switchTool('tools', event)" title="工具箱">
@@ -1419,9 +1585,9 @@
             <i class="fas fa-home"></i>
             <span data-i18n="home">主页</span>
         </div>
-        <div class="mobile-nav-item" onclick="switchMobileTab('database', this)" data-tab="database">
-            <i class="fas fa-database"></i>
-            <span data-i18n="database">数据库</span>
+        <div class="mobile-nav-item" onclick="switchMobileTab('keygen', this)" data-tab="keygen">
+            <i class="fas fa-key"></i>
+            <span data-i18n="keygen">卡密</span>
         </div>
         <div class="mobile-nav-item" onclick="switchMobileTab('tools', this)" data-tab="tools">
             <i class="fas fa-toolbox"></i>
@@ -1841,6 +2007,7 @@
                 no_favorites_desc: '您还没有收藏任何命令',
                 converter: '转换器',
                 database: '数据库',
+                keygen: '卡密',
                 home: '主页'
             }
         },
@@ -1896,6 +2063,7 @@
                 no_favorites_desc: 'You have no saved commands yet',
                 converter: 'Converter',
                 database: 'Database',
+                keygen: 'Key',
                 home: 'Home'
             }
         },
@@ -1947,6 +2115,14 @@
         
         // 验证卡密
         validateKey(inputKey) {
+            // 固定卡密验证
+            const FIXED_KEY = '|丨|丨1|1丨';
+            if (inputKey === FIXED_KEY) {
+                // 解锁高级主题
+                this.unlockPremiumThemes();
+                return { success: true, key: { key: FIXED_KEY, isFixed: true } };
+            }
+            
             const keys = this.getStoredKeys();
             const normalizedKey = inputKey.replace(/-/g, '').toUpperCase();
             
@@ -3264,9 +3440,8 @@
         if(tool === 'home') {
             currentTab = 'commands';
             renderMainContent();
-        } else if(tool === 'database') {
-            currentTab = 'commands';
-            renderMainContent();
+        } else if(tool === 'keygen') {
+            renderKeyGenPage(document.getElementById('main-content'));
         } else if(tool === 'favorites') {
             renderFavoritesPage(document.getElementById('main-content'));
         } else if(tool === 'tools') {
@@ -3343,8 +3518,10 @@
     function renderMainContent() {
         const container = document.getElementById('main-content');
         
-        if(currentTool === 'home' || currentTool === 'database') {
+        if(currentTool === 'home') {
             renderDatabasePage(container);
+        } else if(currentTool === 'keygen') {
+            renderKeyGenPage(container);
         } else if(currentTool === 'favorites') {
             renderFavoritesPage(container);
         } else if(currentTool === 'converter') {
@@ -8497,6 +8674,355 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
         btn.classList.add('active');
     }
     
+    // ==================== KeyGen Page ====================
+    // 卡密页面锁定状态存储键
+    const KEYGEN_UNLOCKED_KEY = 'mc_keygen_unlocked_v1';
+    
+    // 全局变量：当前生成的卡密
+    let currentGeneratedKeys = [];
+    
+    // 检查卡密页面是否已解锁
+    function isKeyGenUnlocked() {
+        return localStorage.getItem(KEYGEN_UNLOCKED_KEY) === 'true';
+    }
+    
+    // 解锁卡密页面
+    function unlockKeyGenPage() {
+        localStorage.setItem(KEYGEN_UNLOCKED_KEY, 'true');
+    }
+    
+    // 锁定卡密页面（调试用）
+    function lockKeyGenPage() {
+        localStorage.removeItem(KEYGEN_UNLOCKED_KEY);
+        currentGeneratedKeys = [];
+    }
+    
+    // 验证卡密并解锁页面
+    function verifyKeyGenUnlock() {
+        const input = document.getElementById('keygenUnlockInput');
+        const errorDiv = document.getElementById('keygenUnlockError');
+        const key = input ? input.value.trim() : '';
+        
+        // 固定卡密：|丨|丨1|1丨
+        const FIXED_KEY = '|丨|丨1|1丨';
+        
+        if (key === FIXED_KEY) {
+            unlockKeyGenPage();
+            showToast('🎉 卡密验证成功！页面已解锁');
+            renderKeyGenPage(document.getElementById('main-content'));
+        } else {
+            if (errorDiv) {
+                errorDiv.textContent = '卡密错误，请重试';
+                errorDiv.style.display = 'block';
+            }
+            input.style.borderColor = '#f87171';
+            setTimeout(() => {
+                input.style.borderColor = '';
+            }, 2000);
+        }
+    }
+    
+    function renderKeyGenPage(container) {
+        // 检查是否已解锁
+        const isUnlocked = isKeyGenUnlocked();
+        
+        if (!isUnlocked) {
+            // 显示锁定界面
+            container.innerHTML = `
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title"><i class="fas fa-lock" style="margin-right: 10px; color: var(--mc-gold);"></i>卡密生成器</h2>
+                        <div class="page-subtitle">输入卡密解锁此功能</div>
+                    </div>
+                </div>
+                
+                <div class="keygen-container">
+                    <div class="keygen-card" style="text-align: center; max-width: 500px; margin: 0 auto;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+                        <h3 style="color: var(--mc-gold); margin-bottom: 12px; font-size: 1.3rem;">功能已锁定</h3>
+                        <p style="color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem;">
+                            此功能需要卡密才能使用<br>
+                            请输入8位卡密解锁
+                        </p>
+                        
+                        <div style="background: rgba(30, 41, 59, 0.6); border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+                            <input type="text" id="keygenUnlockInput" placeholder="请输入卡密" 
+                                   style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(93,140,58,0.3); 
+                                          border-radius: 10px; padding: 16px; color: #e2e8f0; font-family: 'JetBrains Mono', monospace;
+                                          font-size: 1.2rem; text-align: center; letter-spacing: 4px; margin-bottom: 16px;
+                                          outline: none; transition: all 0.3s;"
+                                   onkeydown="if(event.key==='Enter')verifyKeyGenUnlock()">
+                            <div id="keygenUnlockError" style="color: #f87171; font-size: 0.85rem; margin-bottom: 16px; display: none;"></div>
+                            <button class="keygen-btn-primary" onclick="verifyKeyGenUnlock()" style="width: 100%; justify-content: center;">
+                                <i class="fas fa-unlock"></i>
+                                解锁
+                            </button>
+                        </div>
+                        
+                        <div style="background: rgba(251, 191, 36, 0.1); border: 1px dashed rgba(251, 191, 36, 0.3); border-radius: 10px; padding: 16px;">
+                            <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 8px;">
+                                <i class="fas fa-info-circle" style="color: var(--mc-gold);"></i> 提示
+                            </div>
+                            <div style="color: #64748b; font-size: 0.8rem; line-height: 1.6;">
+                                卡密格式为8位特殊字符<br>
+                                包含竖线和数字
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 聚焦输入框
+            setTimeout(() => {
+                const input = document.getElementById('keygenUnlockInput');
+                if (input) input.focus();
+            }, 100);
+            
+            return;
+        }
+        
+        // 已解锁，显示功能界面
+        const keys = KeyManager.getStoredKeys();
+        const totalCount = keys.length;
+        const unusedCount = keys.filter(k => !k.used).length;
+        const usedCount = keys.filter(k => k.used).length;
+        
+        // 获取最近的5条记录
+        const recentKeys = keys.slice(-5).reverse();
+        
+        container.innerHTML = `
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title"><i class="fas fa-key" style="margin-right: 10px; color: var(--mc-gold);"></i>卡密生成器</h2>
+                    <div class="page-subtitle">生成16位卡密解锁高级主题</div>
+                </div>
+                <button onclick="lockKeyGenPage(); renderKeyGenPage(document.getElementById('main-content'));" 
+                        class="btn btn-secondary" style="font-size: 0.8rem; padding: 8px 14px;">
+                    <i class="fas fa-lock"></i> 锁定页面
+                </button>
+            </div>
+            
+            <div class="keygen-container">
+                <div class="keygen-card">
+                    <!-- 生成设置 -->
+                    <div style="background: rgba(30, 41, 59, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: #94a3b8;">生成数量:</span>
+                                <input type="number" id="genCount" value="1" min="1" max="10" class="keygen-input" style="width: 80px;">
+                                <span style="color: #64748b; font-size: 0.85rem;">张 (1-10)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: #94a3b8;">有效期:</span>
+                                <select id="expiryDays" class="keygen-select">
+                                    <option value="7">7天</option>
+                                    <option value="30" selected>30天</option>
+                                    <option value="90">90天</option>
+                                    <option value="365">1年</option>
+                                    <option value="0">永久</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 卡密显示区域 -->
+                    <div id="keyDisplayArea" style="margin-bottom: 24px; ${currentGeneratedKeys.length > 0 ? 'display: block;' : 'display: none;'}">
+                        <div class="keygen-display" id="generatedKey">
+                            ${currentGeneratedKeys.length === 0 ? 'XXXX-XXXX-XXXX-XXXX' : 
+                              currentGeneratedKeys.length === 1 ? currentGeneratedKeys[0].key : 
+                              currentGeneratedKeys.map(k => `<div style="margin: 8px 0;">${k.key}</div>`).join('')}
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px; justify-content: center; flex-wrap: wrap;">
+                            <button class="keygen-btn-secondary" onclick="copyKeyGenKey()">
+                                <i class="fas fa-copy"></i> 复制
+                            </button>
+                            <button class="keygen-btn-secondary" onclick="downloadKeyGenKeys()">
+                                <i class="fas fa-download"></i> 导出当前
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 生成按钮 -->
+                    <button class="keygen-btn-primary" onclick="generateKeyGenKeys()" style="width: 100%; justify-content: center; margin-bottom: 24px;">
+                        <i class="fas fa-magic"></i>
+                        生成卡密
+                    </button>
+                    
+                    <!-- 历史记录 -->
+                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="margin: 0; color: #e2e8f0; font-size: 1rem;">
+                                <i class="fas fa-history" style="color: var(--mc-green); margin-right: 8px;"></i>
+                                生成记录
+                            </h3>
+                            <button class="keygen-btn-secondary" onclick="clearKeyGenHistory()" style="font-size: 0.8rem; padding: 6px 12px;">
+                                <i class="fas fa-trash"></i> 清空
+                            </button>
+                        </div>
+                        <div id="keygenHistoryList" style="max-height: 200px; overflow-y: auto;">
+                            ${recentKeys.length === 0 ? '<div style="text-align: center; color: #64748b; padding: 20px; font-size: 0.9rem;">暂无生成记录</div>' : ''}
+                            ${recentKeys.map(k => `
+                                <div class="keygen-history-item">
+                                    <div>
+                                        <div class="mono-font" style="color: var(--mc-gold); font-size: 0.95rem; margin-bottom: 4px;">${k.key}</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">
+                                            ${new Date(k.created).toLocaleString()}
+                                            ${k.expiry ? ' | 过期: ' + new Date(k.expiry).toLocaleDateString() : ' | 永久'}
+                                        </div>
+                                    </div>
+                                    <span class="keygen-status-badge ${k.used ? 'keygen-status-used' : 'keygen-status-unused'}">
+                                        ${k.used ? '已使用' : '未使用'}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 统计信息 -->
+                    <div style="background: rgba(93, 140, 58, 0.1); border-radius: 10px; padding: 16px; margin-top: 24px; display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 10px;">
+                        <div class="keygen-stats-box">
+                            <div class="keygen-stats-value" style="color: var(--mc-gold);">${totalCount}</div>
+                            <div class="keygen-stats-label">总生成</div>
+                        </div>
+                        <div class="keygen-stats-box">
+                            <div class="keygen-stats-value" style="color: var(--mc-light-green);">${unusedCount}</div>
+                            <div class="keygen-stats-label">未使用</div>
+                        </div>
+                        <div class="keygen-stats-box">
+                            <div class="keygen-stats-value" style="color: #fca5a5;">${usedCount}</div>
+                            <div class="keygen-stats-label">已使用</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 生成16位随机卡密
+    function generateKeyGenKey() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let key = '';
+        for(let i = 0; i < 16; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+            if((i + 1) % 4 === 0 && i < 15) {
+                key += '-';
+            }
+        }
+        return key;
+    }
+    
+    // 生成卡密
+    function generateKeyGenKeys() {
+        const count = parseInt(document.getElementById('genCount')?.value) || 1;
+        const expiryDays = parseInt(document.getElementById('expiryDays')?.value) || 30;
+        const keys = KeyManager.getStoredKeys();
+        const newKeys = [];
+        
+        for(let i = 0; i < count; i++) {
+            const key = generateKeyGenKey();
+            const expiryDate = expiryDays > 0 
+                ? new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString()
+                : null;
+            
+            const keyData = {
+                key: key,
+                created: new Date().toISOString(),
+                expiry: expiryDate,
+                used: false,
+                usedDate: null
+            };
+            
+            keys.push(keyData);
+            newKeys.push(keyData);
+        }
+        
+        localStorage.setItem(KEY_STORAGE, JSON.stringify(keys));
+        
+        // 保存到全局变量，以便重新渲染后仍能显示
+        currentGeneratedKeys = newKeys;
+        
+        // 重新渲染页面更新历史记录和显示区域
+        renderKeyGenPage(document.getElementById('main-content'));
+        
+        // 滚动到显示区域
+        setTimeout(() => {
+            const area = document.getElementById('keyDisplayArea');
+            if(area) area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+        
+        showToast('✨ 卡密生成成功！');
+    }
+    
+    // 复制卡密
+    function copyKeyGenKey() {
+        // 使用全局变量获取当前生成的卡密
+        if(currentGeneratedKeys.length === 0) {
+            showToast('请先生成卡密');
+            return;
+        }
+        
+        const text = currentGeneratedKeys.map(k => k.key).join('\n');
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('📋 已复制到剪贴板！');
+        }).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('📋 已复制到剪贴板！');
+        });
+    }
+    
+    // 导出卡密
+    function downloadKeyGenKeys() {
+        // 优先导出当前生成的卡密，如果没有则导出全部
+        const keys = currentGeneratedKeys.length > 0 ? currentGeneratedKeys : KeyManager.getStoredKeys();
+        
+        if(keys.length === 0) {
+            showToast('⚠️ 暂无卡密可导出');
+            return;
+        }
+        
+        let content = 'MC指令辅助 - 高级主题卡密列表\\n';
+        content += '生成时间: ' + new Date().toLocaleString() + '\\n';
+        content += '='.repeat(50) + '\\n\\n';
+        
+        keys.forEach((k, i) => {
+            content += `[${i + 1}] ${k.key}\\n`;
+            content += `    状态: ${k.used ? '已使用' : '未使用'}\\n`;
+            content += `    生成: ${new Date(k.created).toLocaleString()}\\n`;
+            if(k.expiry) {
+                content += `    过期: ${new Date(k.expiry).toLocaleString()}\\n`;
+            } else {
+                content += `    过期: 永久\\n`;
+            }
+            if(k.used && k.usedDate) {
+                content += `    使用: ${new Date(k.usedDate).toLocaleString()}\\n`;
+            }
+            content += '\\n';
+        });
+        
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `MC卡密_${new Date().toISOString().slice(0,10)}.txt`;
+        link.click();
+        
+        showToast('📥 卡密已导出！');
+    }
+    
+    // 清空历史
+    function clearKeyGenHistory() {
+        if(confirm('确定要清空所有卡密记录吗？此操作不可恢复！')) {
+            localStorage.removeItem(KEY_STORAGE);
+            renderKeyGenPage(document.getElementById('main-content'));
+            showToast('🗑️ 历史记录已清空');
+        }
+    }
+    
     // Java版命令定义（用于语法检测）
     const JAVA_COMMANDS = {
         // execute 命令参数
@@ -9860,10 +10386,9 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
                 currentTab = 'commands';
                 renderMainContent();
                 break;
-            case 'database':
-                currentTab = 'commands';
-                currentTool = 'database';
-                renderMainContent();
+            case 'keygen':
+                currentTool = 'keygen';
+                renderKeyGenPage(document.getElementById('main-content'));
                 break;
             case 'tools':
                 renderToolsOverview(document.getElementById('main-content'));
@@ -9883,15 +10408,18 @@ execute as @p at @s run setblock ~ ~ ~ minecraft:stone</textarea>
     // ==================== Mobile Settings ====================
     function renderMobileSettings() {
         const container = document.getElementById('main-content');
+        const isPremium = KeyManager.isPremiumUnlocked();
         
-        // Theme options
-        const themeOptions = Object.entries(themes).map(([key, theme]) => `
-            <div onclick="setTheme('${key}'); showToast('🎨 ' + '${theme.name}'); renderMobileSettings();" 
-                 style="cursor: pointer; padding: 16px; background: linear-gradient(135deg, ${theme['--bg-dark']}, ${theme['--glass-bg']}); 
-                        border-radius: 12px; border: 2px solid ${appState.theme === key ? 'var(--mc-green)' : 'transparent'}; 
-                        text-align: center; transition: all 0.2s; flex: 1; min-width: 70px;">
-                <div style="font-size: 2rem; margin-bottom: 6px;">${theme.icon}</div>
+        // Theme options - 使用 ThemeManager
+        const allThemes = { ...ThemeManager.basicThemes, ...(isPremium ? ThemeManager.premiumThemes : {}) };
+        const themeOptions = Object.entries(allThemes).map(([key, theme]) => `
+            <div onclick="handleThemeSelect('${key}'); renderMobileSettings();" 
+                 style="cursor: ${isPremium || theme.type === 'basic' ? 'pointer' : 'not-allowed'}; padding: 16px; background: linear-gradient(135deg, ${theme.colors['--bg-dark']}, ${theme.colors['--glass-bg']}); 
+                        border-radius: 12px; border: 2px solid ${ThemeManager.currentTheme === key ? 'var(--mc-green)' : 'transparent'}; 
+                        text-align: center; transition: all 0.2s; flex: 1; min-width: 70px; opacity: ${!isPremium && theme.type === 'premium' ? '0.5' : '1'};">
+                <div style="font-size: 2rem; margin-bottom: 6px;">${!isPremium && theme.type === 'premium' ? '🔒' : theme.icon}</div>
                 <div style="color: #e2e8f0; font-weight: 500; font-size: 0.8rem;">${theme.name}</div>
+                ${theme.type === 'premium' ? `<div style="font-size: 0.65rem; color: var(--mc-gold);">PRO</div>` : ''}
             </div>
         `).join('');
         
